@@ -11,6 +11,7 @@ public class mod_SeedManager extends BaseMod {
         MinecraftForgeClient.preloadTexture("/fm_seedmanager.png");
         ModLoader.RegisterBlock(new SeedManagerBlock(190), SeedManagerItem.class);
         ModLoader.RegisterTileEntity(SeedLibraryTileEntity.class, "Seed Library");
+        ModLoader.RegisterTileEntity(SeedAnalyzerTileEntity.class, "Seed Analyzer");
         ModLoader.AddLocalization("tile.seedManager.name", "Seed Manager");
     }
 

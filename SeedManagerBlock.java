@@ -7,6 +7,9 @@ import net.minecraft.src.ModLoader;
 import net.minecraft.src.World;
 import net.minecraft.src.forge.ITextureProvider;
 import net.minecraft.src.ic2.api.Items;
+import ic2.common.ContainerElectricMachine;
+import ic2.common.IHasGui;
+import ic2.platform.Platform;
 
 public class SeedManagerBlock extends BlockContainer implements ITextureProvider {
     public SeedManagerBlock(int id) {
@@ -28,8 +31,8 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
         {
             if (seedmanager instanceof SeedLibraryTileEntity) {
                 ModLoader.getMinecraftInstance().displayGuiScreen(new SeedLibraryGUI(entityplayer.inventory, seedmanager));
-            } else { // if (seedmanager instanceof SeedAnalyzerTileEntity)
-                //ModLoader.getMinecraftInstance().displayGuiScreen(new SeedAnalyzerGUI(entityplayer.inventory, seedmanager));
+            } else if (seedmanager instanceof SeedAnalyzerTileEntity) {
+                ModLoader.getMinecraftInstance().displayGuiScreen(new SeedAnalyzerGUI((ContainerElectricMachine) ((IHasGui)seedmanager).getGuiContainer(entityplayer)));
             }
         }
         return true;
@@ -41,7 +44,7 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
 
     public TileEntity getBlockEntity(int data) {
         if (data == 0) {
-            return null;
+            return new SeedAnalyzerTileEntity();
         } else { // data == 1
             return new SeedLibraryTileEntity();
         }
