@@ -1,14 +1,15 @@
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
-import ic2.common.TileEntityElectricMachine;
-import ic2.common.ItemCropSeed;
-import ic2.api.Items;
+import net.minecraft.src.ic2.common.TileEntityElectricMachine;
+import net.minecraft.src.ic2.common.ItemCropSeed;
+import net.minecraft.src.ic2.api.Items;
 
 public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
     public static final int[] cost_to_upgrade = {10, 90, 900, 9000};
+    public static final int cost_reduction = 2;
     public SeedAnalyzerTileEntity()
     {
-        super(3, 5, 2000, 32);
+        super(3, 5, 2000/cost_reduction, 32);
     }
 
     public static boolean isSeed(ItemStack stack) {
@@ -72,7 +73,8 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
             return false;
         }
 
-        defaultOperationLength = cost_to_upgrade[scan] / defaultEnergyConsume;
+        defaultOperationLength = cost_to_upgrade[scan] /
+                                 (defaultEnergyConsume * cost_reduction);
         return true;
     }
 

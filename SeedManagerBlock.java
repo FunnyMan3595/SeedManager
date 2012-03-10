@@ -7,9 +7,9 @@ import net.minecraft.src.ModLoader;
 import net.minecraft.src.World;
 import net.minecraft.src.forge.ITextureProvider;
 import net.minecraft.src.ic2.api.Items;
-import ic2.common.ContainerElectricMachine;
-import ic2.common.IHasGui;
-import ic2.platform.Platform;
+import net.minecraft.src.ic2.common.ContainerElectricMachine;
+import net.minecraft.src.ic2.common.IHasGui;
+import net.minecraft.src.ic2.platform.Platform;
 
 public class SeedManagerBlock extends BlockContainer implements ITextureProvider {
     public SeedManagerBlock(int id) {
