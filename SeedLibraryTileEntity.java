@@ -10,6 +10,7 @@ import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
 import net.minecraft.src.forge.ITextureProvider;
 import net.minecraft.src.ic2.common.ItemCropSeed;
+import net.minecraft.src.ic2.api.CropCard;
 import net.minecraft.src.ic2.api.Items;
 import net.minecraft.src.ic2.api.IWrenchable;
 import net.minecraft.src.buildcraft.api.ISpecialInventory;
@@ -28,48 +29,90 @@ public class SeedLibraryTileEntity extends TileEntity implements IWrenchable, IS
             filters[i] = new SeedLibraryFilter();
         }
 
-        filters[0].min_growth = 10;
-        filters[0].min_gain = 10;
-        filters[0].min_resistance = 10;
-        filters[0].min_total = 40;
-        filters[0].allow_unknown_ggr = false;
-        filters[0].sort = SeedLibrarySort.TOTAL_DESC;
+        filters[6].min_growth = 10;
+        filters[6].max_growth = 16;
     }
 
+    public SeedLibraryFilter getGUIFilter() {
+        return filters[6];
+    }
 
-    // Save/load
-    public void readFromNBT(NBTTagCompound nbttagcompound)
-    {
-        super.readFromNBT(nbttagcompound);
-        NBTTagList nbttaglist = nbttagcompound.getTagList("Items");
-        shallowContents = new ItemStack[getSizeInventory()];
-        for (int i = 0; i < nbttaglist.tagCount(); i++)
-        {
-            NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttaglist.tagAt(i);
-            int j = nbttagcompound1.getByte("Slot") & 0xff;
-            if (j >= 0 && j < shallowContents.length)
-            {
-                shallowContents[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+    public int getGUISeedCount() {
+        return filters[6].getCount(deepContents.values());
+    }
+
+    public void storeSeeds(ItemStack seeds) {
+        String key = getKey(seeds);
+        ItemStack stored = deepContents.get(key);
+        if (stored != null) {
+            stored.stackSize += seeds.stackSize;
+        } else {
+            stored = seeds.copy();
+            deepContents.put(key, stored);
+            for (SeedLibraryFilter filter : filters) {
+                filter.newSeed(stored);
             }
         }
     }
 
-    public void writeToNBT(NBTTagCompound nbttagcompound)
+    // Save/load
+    public void readFromNBT(NBTTagCompound input)
     {
-        super.writeToNBT(nbttagcompound);
-        NBTTagList nbttaglist = new NBTTagList();
+        super.readFromNBT(input);
+        NBTTagList filterlist = input.getTagList("Filters");
+        for (int i = 0; i < 7; i++) {
+            NBTTagCompound filter = (NBTTagCompound)filterlist.tagAt(i);
+            filters[i].loadFromNBT(filter);
+        }
+
+        NBTTagList inventory = input.getTagList("Items");
+        shallowContents = new ItemStack[getSizeInventory()];
+        for (int i = 0; i < inventory.tagCount(); i++)
+        {
+            NBTTagCompound slot = (NBTTagCompound)inventory.tagAt(i);
+            int j = slot.getByte("Slot");
+            ItemStack stack = ItemStack.loadItemStackFromNBT(slot);
+            if (j >= 0 && j < shallowContents.length)
+            {
+                shallowContents[j] = stack;
+            } else {
+                storeSeeds(stack);
+            }
+        }
+    }
+
+    public void writeToNBT(NBTTagCompound output)
+    {
+        super.writeToNBT(output);
+        NBTTagList inventory = new NBTTagList();
         for (int i = 0; i < shallowContents.length; i++)
         {
             if (shallowContents[i] != null)
             {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("Slot", (byte)i);
-                shallowContents[i].writeToNBT(nbttagcompound1);
-                nbttaglist.appendTag(nbttagcompound1);
+                NBTTagCompound slot = new NBTTagCompound();
+                slot.setByte("Slot", (byte)i);
+                shallowContents[i].writeToNBT(slot);
+                inventory.appendTag(slot);
             }
         }
 
-        nbttagcompound.setTag("Items", nbttaglist);
+        for (ItemStack seed : deepContents.values()) {
+            NBTTagCompound seedtag = new NBTTagCompound();
+            seedtag.setByte("Slot", (byte) -1);
+            seed.writeToNBT(seedtag);
+            inventory.appendTag(seedtag);
+        }
+
+        output.setTag("Items", inventory);
+
+        NBTTagList filterlist = new NBTTagList();
+        for (int i = 0; i < 7; i++) {
+            NBTTagCompound filtertag = new NBTTagCompound();
+            filters[i].writeToNBT(filtertag);
+            filterlist.appendTag(filtertag);
+        }
+
+        output.setTag("Filters", filterlist);
     }
 
 
@@ -99,13 +142,19 @@ public class SeedLibraryTileEntity extends TileEntity implements IWrenchable, IS
         return 9;
     }
 
-    public synchronized ItemStack getStackInSlot(int i)
+    public synchronized ItemStack getStackInSlot(int slot)
     {
-        return shallowContents[i];
+        if (slot < 0 || slot >= 9) {
+            return null;
+        }
+        return shallowContents[slot];
     }
 
     public synchronized ItemStack decrStackSize(int i, int j)
     {
+        if (i < 0 || i >= 9) {
+            return null;
+        }
         if (shallowContents[i] != null)
         {
             if (shallowContents[i].stackSize <= j)
@@ -131,6 +180,9 @@ public class SeedLibraryTileEntity extends TileEntity implements IWrenchable, IS
 
     public synchronized void setInventorySlotContents(int i, ItemStack itemstack)
     {
+        if (i < 0 || i >= 9) {
+            return;
+        }
         shallowContents[i] = itemstack;
         if (itemstack != null && itemstack.stackSize > getInventoryStackLimit())
         {
@@ -180,17 +232,7 @@ public class SeedLibraryTileEntity extends TileEntity implements IWrenchable, IS
         // XXX If seeds stack >1 later, remove this line.
         stack.stackSize = 1;
 
-        String key = getKey(stack);
-        ItemStack stored = deepContents.get(key);
-        if (stored != null) {
-            stored.stackSize += stack.stackSize;
-        } else {
-            stored = stack.copy();
-            deepContents.put(key, stored);
-            for (SeedLibraryFilter filter : filters) {
-                filter.newSeed(stored);
-            }
-        }
+        storeSeeds(stack);
 
         stack.stackSize = 0;
 
@@ -206,7 +248,9 @@ public class SeedLibraryTileEntity extends TileEntity implements IWrenchable, IS
             byte resist = (byte) rand.nextInt(32);
             return ItemCropSeed.generateItemStackFromValues(id, growth, gain, resist, (byte)4);
         } else {
-            ItemStack stored = filters[0].getSeed(deepContents.values());
+            int dir = from.ordinal();
+            dir = 6; // XXX: Testing only.
+            ItemStack stored = filters[dir].getSeed(deepContents.values());
             if (stored == null) {
                 return null;
             }

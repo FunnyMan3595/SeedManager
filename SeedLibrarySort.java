@@ -26,6 +26,36 @@ public class SeedLibrarySort implements java.util.Comparator<ItemStack> {
         descending = desc;
     }
 
+    public static SeedLibrarySort getSort(int type, boolean desc) {
+        if (type == NO_SORT) {
+            return NONE;
+        } else if (type == GROWTH) {
+            if (desc) {
+                return GROWTH_DESC;
+            } else {
+                return GROWTH_ASC;
+            }
+        } else if (type == GAIN) {
+            if (desc) {
+                return GAIN_DESC;
+            } else {
+                return GAIN_ASC;
+            }
+        } else if (type == RESISTANCE) {
+            if (desc) {
+                return RESISTANCE_DESC;
+            } else {
+                return RESISTANCE_ASC;
+            }
+        } else { //if (type == TOTAL) {
+            if (desc) {
+                return TOTAL_DESC;
+            } else {
+                return TOTAL_ASC;
+            }
+        }
+    }
+
     public int compare(ItemStack seed_1, ItemStack seed_2) {
         if (sort_type == NO_SORT) {
             return 0;

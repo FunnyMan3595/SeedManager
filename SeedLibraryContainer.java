@@ -7,19 +7,18 @@ import java.util.List;
 
 public class SeedLibraryContainer extends Container
 {
-    private SeedLibraryTileEntity seedmanager;
+    private SeedLibraryTileEntity seedlibrary;
 
-    public SeedLibraryContainer(IInventory iinventory, SeedLibraryTileEntity tileentitydispenser)
+    public SeedLibraryContainer(IInventory iinventory, SeedLibraryTileEntity seedmanager)
     {
-        seedmanager = tileentitydispenser;
+        seedlibrary = seedmanager;
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 9; i++)
         {
-            for (int l = 0; l < 3; l++)
-            {
-                addSlot(new Slot(tileentitydispenser, l + i * 3, 8 + l * 18, 18 + i * 18));
-            }
+            addSlot(new Slot(seedlibrary, i, 8 + i * 18, 108));
         }
+
+        addSlot(new Slot(seedlibrary, -1, 38, 16));
 
         int i = 2*18;
 
@@ -27,19 +26,29 @@ public class SeedLibraryContainer extends Container
         {
             for (int j1 = 0; j1 < 9; j1++)
             {
-                addSlot(new Slot(iinventory, j1 + k * 9 + 9, 8 + j1 * 18, 103 + k * 18 + i));
+                addSlot(new Slot(iinventory, j1 + k * 9 + 9, 8 + j1 * 18, 104 + k * 18 + i));
             }
         }
 
         for (int l = 0; l < 9; l++)
         {
-            addSlot(new Slot(iinventory, l, 8 + l * 18, 161 + i));
+            addSlot(new Slot(iinventory, l, 8 + l * 18, 162 + i));
         }
     }
 
     public boolean canInteractWith(EntityPlayer entityplayer)
     {
-        return seedmanager.isUseableByPlayer(entityplayer);
+        return seedlibrary.isUseableByPlayer(entityplayer);
+    }
+
+    public ItemStack slotClick(int i, int j, boolean flag, EntityPlayer entityplayer) {
+        if (i == 9) {
+            // Clicked the "take a seed's type" slot.
+            ItemStack seed = entityplayer.inventory.getItemStack();
+            seedlibrary.getGUIFilter().setCropFromSeed(seed);
+            return null;
+        }
+        return super.slotClick(i, j, flag, entityplayer);
     }
 
     public ItemStack transferStackInSlot(int i)
