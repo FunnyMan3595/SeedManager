@@ -66,6 +66,21 @@ public class SeedLibraryGUI extends GuiContainer
         int count_width = fontRenderer.getStringWidth(count);
         fontRenderer.drawString(count, 128 - count_width, 88, 0x404040);
 
+        if (seedlibrary.energy <= 0) {
+            drawRect(left, top, right, bottom + 20, 0xff000000);
+            drawCenteredString("Out of power.", center, middle - 3, 0x404040);
+            drawCenteredString("Connect to LV power", center, middle + 6, 0x404040);
+            drawCenteredString("or insert a battery.", center, middle + 15, 0x404040);
+
+            // Re-bind the GUI's texture, because something else took over.
+            int k = mc.renderEngine.getTexture("/fm_seedlibrary_gui.png");
+            mc.renderEngine.bindTexture(k);
+
+            drawTexturedModalRect(left + 3, bottom, 176, 18, 18, 18);
+            fontRenderer.drawString("Battery slot", left + 23, bottom + 5,
+                                    0x404040);
+        }
+
         fontRenderer.drawString("Inventory", 8, (ySize - 96) + 2, 0x404040);
     }
 
@@ -150,6 +165,10 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected void mouseClicked(int x, int y, int button) {
         super.mouseClicked(x, y, button);
+        if (seedlibrary.energy <= 0) {
+            current_slider = -1;
+            return;
+        }
         int screen_x = x;
         int screen_y = y;
         if (button == 0) {
@@ -272,6 +291,10 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected void mouseMovedOrUp(int x, int y, int button) {
         super.mouseMovedOrUp(x, y, button);
+        if (seedlibrary.energy <= 0) {
+            current_slider = -1;
+            return;
+        }
         if (button == -1) {
             // Mouse moved.
             // If we're following the mouse with a slider, move it.

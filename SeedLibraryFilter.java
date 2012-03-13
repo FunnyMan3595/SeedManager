@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.Vector;
 
 public class SeedLibraryFilter {
-    public boolean allow_unknown_type = true;
-    public boolean allow_unknown_ggr = true;
+    public boolean allow_unknown_type = false;
+    public boolean allow_unknown_ggr = false;
     public int seed_type = -1;
     public int min_growth = 0;
     public int min_gain = 0;

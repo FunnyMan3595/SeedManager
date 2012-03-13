@@ -1,5 +1,6 @@
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
+import net.minecraft.src.TileEntity;
 import net.minecraft.src.ic2.common.TileEntityElectricMachine;
 import net.minecraft.src.ic2.common.ItemCropSeed;
 import net.minecraft.src.ic2.api.Items;
@@ -55,6 +56,56 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
     }
 
     public boolean canOperate() {
+        if (inventory[0] == null && isRedstonePowered()) {
+            boolean need_input = (inventory[0] == null);
+            boolean need_output = isSeed(inventory[2]);
+
+            if (need_input && need_output) {
+                if (ItemCropSeed.getScannedFromStack(inventory[2]) < 4) {
+                    inventory[0] = inventory[2];
+                    inventory[2] = null;
+                    return true;
+                }
+            }
+
+            for (int dir=0; dir<4; dir++) {
+                if (!need_input && !need_output) {
+                    break;
+                }
+
+                int x = xCoord;
+                int y = yCoord;
+                int z = zCoord;
+                if (dir == 0) {
+                    x++;
+                } else if (dir == 1) {
+                    x--;
+                } else if (dir == 2) {
+                    z++;
+                } else {
+                    z--;
+                }
+
+                TileEntity te = worldObj.getBlockTileEntity(x, y, z);
+                if (te != null && te instanceof SeedLibraryTileEntity) {
+                    SeedLibraryTileEntity library = (SeedLibraryTileEntity) te;
+                    if (need_input && library.energy > 0) {
+                        ItemStack seed = library.getResearchSeed();
+                        if (seed != null) {
+                            inventory[0] = seed;
+                            need_input = false;
+                        }
+                    }
+
+                    if (need_output) {
+                        library.storeSeeds(inventory[2]);
+                        inventory[2] = null;
+                        need_output = false;
+                    }
+                }
+            }
+        }
+
         if (!isSeed(inventory[0])) {
             return false;
         }

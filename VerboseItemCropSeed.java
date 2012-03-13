@@ -4,6 +4,7 @@ import net.minecraft.src.ItemStack;
 import java.util.List;
 
 public class VerboseItemCropSeed extends ItemCropSeed {
+    public static final String yellow = '\247' + "e";
     public static final String green = '\247' + "a";
     public static final String black = '\247' + "0";
 
@@ -14,9 +15,13 @@ public class VerboseItemCropSeed extends ItemCropSeed {
 
     public void addInformation(ItemStack stack, List list) {
         if (getScannedFromStack(stack) == 4) {
-            list.add(green + "Gr " + pad(getGrowthFromStack(stack)));
-            list.add(green + "Ga " + pad(getGainFromStack(stack)));
-            list.add(green + "Re " + pad(getResistanceFromStack(stack)));
+            int growth = getGrowthFromStack(stack);
+            int gain = getGainFromStack(stack);
+            int resistance = getResistanceFromStack(stack);
+            list.add(green + "Gr " + pad(growth));
+            list.add(green + "Ga " + pad(gain));
+            list.add(green + "Re " + pad(resistance));
+            list.add(yellow + "Lv " + (growth + gain + resistance));
         }
     }
 
