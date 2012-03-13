@@ -20,6 +20,7 @@ import net.minecraft.src.buildcraft.api.ISpecialInventory;
 import net.minecraft.src.buildcraft.api.Orientations;
 
 public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWrenchable, ISpecialInventory {
+    public static final boolean DEBUG_SEEDS = false;
     protected SeedLibraryFilter[] filters = new SeedLibraryFilter[7];
     protected HashMap<String, ItemStack> deepContents = new HashMap<String, ItemStack>();
     protected Vector<ItemStack> unresearched = new Vector<ItemStack>();
@@ -41,6 +42,36 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
                 energy--;
             }
             provideEnergy();
+        }
+    }
+
+    public void importFromInventory() {
+        for (int i=0; i<9; i++) {
+            if (SeedAnalyzerTileEntity.isSeed(inventory[i])) {
+                storeSeeds(inventory[i]);
+                inventory[i] = null;
+            }
+        }
+    }
+
+    public void exportToInventory() {
+        for (int i=0; i<9; i++) {
+            if (inventory[i] == null) {
+                // Get a seed from the active filter.
+                ItemStack seed = filters[6].getSeed(deepContents.values());
+
+                if (seed == null) {
+                    // No seeds left; stop exporting.
+                    break;
+                }
+
+                // Add one of the seed to the inventory.
+                inventory[i] = seed.copy();
+                inventory[i].stackSize = 1;
+
+                // And remove the seed from main storage.
+                removeSeeds(inventory[i]);
+            }
         }
     }
 
@@ -246,9 +277,6 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             return true;
         }
 
-        // XXX If seeds stack >1 later, remove this line.
-        stack.stackSize = 1;
-
         storeSeeds(stack);
 
         stack.stackSize = 0;
@@ -262,7 +290,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             return null;
         }
 
-        if (from == Orientations.YPos) {
+        if (DEBUG_SEEDS && from == Orientations.YPos) {
             Random rand = new Random();
             short id = (short) (rand.nextInt(15) + 1);
             byte growth = (byte) rand.nextInt(32);
@@ -271,7 +299,6 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             return ItemCropSeed.generateItemStackFromValues(id, growth, gain, resist, (byte)0);
         } else {
             int dir = from.ordinal();
-            dir = 6; // XXX: Testing only.
             ItemStack stored = filters[dir].getSeed(deepContents.values());
             if (stored == null) {
                 return null;

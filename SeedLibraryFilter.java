@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.Vector;
 
 public class SeedLibraryFilter {
-    public boolean allow_unknown_type = false;
-    public boolean allow_unknown_ggr = false;
+    public boolean allow_unknown_type = true;
+    public boolean allow_unknown_ggr = true;
     public int seed_type = -1;
     public int min_growth = 0;
     public int min_gain = 0;
@@ -18,11 +18,28 @@ public class SeedLibraryFilter {
     public int max_resistance = 31;
     public int min_total = 0;
     public int max_total = 93;
-    public SeedLibrarySort sort = SeedLibrarySort.NONE;
+    public SeedLibrarySort sort = SeedLibrarySort.TOTAL_DESC;
 
     public static final int CACHE_SIZE = 10;
     public Vector<ItemStack> cache = new Vector<ItemStack>(CACHE_SIZE+1);
     public boolean cached_nothing = false;
+
+    public void copyFrom(SeedLibraryFilter source) {
+        allow_unknown_type = source.allow_unknown_type;
+        allow_unknown_ggr = source.allow_unknown_ggr;
+        seed_type = source.seed_type;
+        min_growth = source.min_growth;
+        min_gain = source.min_gain;
+        min_resistance = source.min_resistance;
+        max_growth = source.max_growth;
+        max_gain = source.max_gain;
+        max_resistance = source.max_resistance;
+        min_total = source.min_total;
+        max_total = source.max_total;
+        sort = source.sort;
+
+        settingsChanged();
+    }
 
     public ItemStack getSeed(Collection<ItemStack> seeds) {
         if (cached_nothing) {

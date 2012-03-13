@@ -1,14 +1,1 @@
-# Block ID customization
-# Total stats in seed tooltip
-# Energy usage and requirement for seed library
-# Disable GUI while crouching
-# Correct block names
-# NEI/Creative mode visibility
-# Crafting recipes
-# Fix drops
-# Library/Analyzer integration
-* Unknown type/GGR buttons
-* Save/Load to NSEWUD buttons
 * Tooltips for more info
-* Import/Export to shallow inventory buttons
-* Remove debug stuff (default filter, random seeds from top, pulls use filter 6)

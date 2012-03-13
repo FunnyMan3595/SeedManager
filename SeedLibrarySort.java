@@ -61,6 +61,16 @@ public class SeedLibrarySort implements java.util.Comparator<ItemStack> {
             return 0;
         }
 
+        // If we're sorting, sort less-scanned seeds to the back, sorted by
+        // scan level only.
+        int scan_1 = ItemCropSeed.getScannedFromStack(seed_1);
+        int scan_2 = ItemCropSeed.getScannedFromStack(seed_2);
+        if (scan_1 != scan_2) {
+            return scan_1 - scan_2;
+        } else if (scan_1 < 4) {
+            return 0;
+        }
+
         int value_1, value_2;
         if (sort_type == GROWTH) {
             value_1 = ItemCropSeed.getGrowthFromStack(seed_1);

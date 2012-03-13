@@ -56,7 +56,7 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
     }
 
     public boolean canOperate() {
-        if (inventory[0] == null && isRedstonePowered()) {
+        if (isRedstonePowered()) {
             boolean need_input = (inventory[0] == null);
             boolean need_output = isSeed(inventory[2]);
 
