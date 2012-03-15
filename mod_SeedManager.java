@@ -20,14 +20,26 @@ public class mod_SeedManager extends BaseMod {
 
     public void load() {
         // Get block ID from config.
-        int blockID = Integer.parseInt(config.getOrCreateBlockIdProperty("seed_manager", 190 ).value);
+        String id_strs[] = {
+            config.getOrCreateIntProperty("seed_manager",
+                                          config.BLOCK_PROPERTY, 190).value,
+        };
         config.save();
+
+        int ids[] = new int[id_strs.length];
+        try {
+            for (int i=0; i<id_strs.length; i++) {
+                ids[i] = Integer.parseInt(id_strs[i]);
+            }
+        } catch (NumberFormatException e) {
+        }
 
         // Preload the in-world texture.
         MinecraftForgeClient.preloadTexture("/fm_seedmanager.png");
 
         // Register with ModLoader.
-        ModLoader.RegisterBlock(new SeedManagerBlock(blockID), SeedManagerItem.class);
+        SeedManagerBlock seedmanager = new SeedManagerBlock(ids[0]);
+        ModLoader.RegisterBlock(seedmanager, SeedManagerItem.class);
         ModLoader.RegisterTileEntity(SeedAnalyzerTileEntity.class, "Seed Analyzer");
         ModLoader.RegisterTileEntity(SeedLibraryTileEntity.class, "Seed Library");
         ModLoader.AddLocalization("tile.seedAnalyzer.name", "Seed Analyzer");
@@ -38,8 +50,8 @@ public class mod_SeedManager extends BaseMod {
         Ic2Items.cropSeed = new ItemStack(new VerboseItemCropSeed(Ic2Items.cropSeed));
 
         // Add recipes.
-        ItemStack seedAnalyzer = new ItemStack(blockID, 1, 0);
-        ItemStack seedLibrary = new ItemStack(blockID, 1, 1);
+        ItemStack seedAnalyzer = new ItemStack(seedmanager, 1, 0);
+        ItemStack seedLibrary = new ItemStack(seedmanager, 1, 1);
 
         Ic2Recipes.addCraftingRecipe(seedAnalyzer, new Object[] {
             " Z ", "#M#", "#C#",
@@ -59,7 +71,7 @@ public class mod_SeedManager extends BaseMod {
     }
 
     public String getVersion() {
-        return "1";
+        return "v1.1";
     }
 
     public String getPriorities() {
