@@ -20,9 +20,13 @@ public class mod_SeedManager extends BaseMod {
 
     public void load() {
         // Get block ID from config.
+        try {
+            config.load();
+        } catch (RuntimeException e) {} // Just regenerate the config if it's
+                                        // broken.
         String id_strs[] = {
-            config.getOrCreateIntProperty("seed_manager",
-                                          config.BLOCK_PROPERTY, 190).value,
+            config.getOrCreateIntProperty("seed.manager",
+                                          config.CATEGORY_BLOCK, 190).value,
         };
         config.save();
 
@@ -39,12 +43,12 @@ public class mod_SeedManager extends BaseMod {
 
         // Register with ModLoader.
         SeedManagerBlock seedmanager = new SeedManagerBlock(ids[0]);
-        ModLoader.RegisterBlock(seedmanager, SeedManagerItem.class);
-        ModLoader.RegisterTileEntity(SeedAnalyzerTileEntity.class, "Seed Analyzer");
-        ModLoader.RegisterTileEntity(SeedLibraryTileEntity.class, "Seed Library");
-        ModLoader.AddLocalization("tile.seedAnalyzer.name", "Seed Analyzer");
-        ModLoader.AddLocalization("tile.seedLibrary.name", "Seed Library");
-        ModLoader.AddLocalization("tile.seedManager.name", "Seed Manager");
+        ModLoader.registerBlock(seedmanager, SeedManagerItem.class);
+        ModLoader.registerTileEntity(SeedAnalyzerTileEntity.class, "Seed Analyzer");
+        ModLoader.registerTileEntity(SeedLibraryTileEntity.class, "Seed Library");
+        ModLoader.addLocalization("tile.seedAnalyzer.name", "Seed Analyzer");
+        ModLoader.addLocalization("tile.seedLibrary.name", "Seed Library");
+        ModLoader.addLocalization("tile.seedManager.name", "Seed Manager");
 
         // Overwrite the IC2 crop seed with the improved version.
         Ic2Items.cropSeed = new ItemStack(new VerboseItemCropSeed(Ic2Items.cropSeed));
@@ -71,7 +75,7 @@ public class mod_SeedManager extends BaseMod {
     }
 
     public String getVersion() {
-        return "v1.1";
+        return "v1.2";
     }
 
     public String getPriorities() {
