@@ -5,9 +5,13 @@ import net.minecraft.src.TileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.ic2.platform.GuiIconButton;
 import org.lwjgl.opengl.GL11;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SeedLibraryGUI extends GuiContainer
 {
+    protected List realControls = null;
+    protected List noControls = new ArrayList();
     private static java.lang.reflect.Field textureY = null;
     private boolean rightClick = false;
     private GuiButton rightSelect;
@@ -74,6 +78,8 @@ public class SeedLibraryGUI extends GuiContainer
             String name = "" + key.charAt(dir);
             controlList.add(new GuiButton(dir + 4, x + dir*13, y, 12, 20, name));
         }
+
+        realControls = controlList;
     }
 
     protected void actionPerformed(GuiButton guibutton)
@@ -175,6 +181,10 @@ public class SeedLibraryGUI extends GuiContainer
             drawTexturedModalRect(left + 3, bottom, 176, 18, 18, 18);
             fontRenderer.drawString("Battery slot", left + 23, bottom + 5,
                                     0x404040);
+
+            controlList = noControls;
+        } else {
+            controlList = realControls;
         }
 
         fontRenderer.drawString("Inventory", 8, (ySize - 96) + 2, 0x404040);
