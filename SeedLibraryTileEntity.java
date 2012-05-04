@@ -41,7 +41,9 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             if (energy > 0) {
                 energy--;
             }
-            provideEnergy();
+            if (energy < maxEnergy) {
+                provideEnergy();
+            }
         }
     }
 

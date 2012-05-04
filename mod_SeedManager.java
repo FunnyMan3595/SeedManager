@@ -75,7 +75,7 @@ public class mod_SeedManager extends BaseMod {
     }
 
     public String getVersion() {
-        return "v1.2.1";
+        return "v1.3";
     }
 
     public String getPriorities() {
