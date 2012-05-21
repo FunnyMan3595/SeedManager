@@ -1,15 +1,23 @@
+import java.io.ByteArrayOutputStream;
+import java.util.zip.GZIPOutputStream;
+import java.io.IOException;
+import java.io.DataOutputStream;
 import java.util.Random;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
+import net.minecraft.src.forge.MinecraftForge;
 import net.minecraft.src.IInventory;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.Block;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.Material;
+import net.minecraft.src.NBTBase;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
 import net.minecraft.src.forge.ITextureProvider;
+import net.minecraft.src.NetworkManager;
 import net.minecraft.src.ic2.platform.Platform;
 import net.minecraft.src.ic2.common.TileEntityElecMachine;
 import net.minecraft.src.ic2.common.ItemCropSeed;
@@ -25,11 +33,79 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     protected HashMap<String, ItemStack> deepContents = new HashMap<String, ItemStack>();
     protected Vector<ItemStack> unresearched = new Vector<ItemStack>();
 
+    public List listeners = null;
+
+    // The number of seeds that match the GUI filter.
+    public int seeds_available = 0;
+
     public SeedLibraryTileEntity() {
         super(9, 0, 200, 32);
 
-        for (int i=0; i<filters.length; i++) {
-            filters[i] = new SeedLibraryFilter();
+        for (int i=0; i<filters.length-1; i++) {
+            filters[i] = new SeedLibraryFilter(null);
+        }
+
+        // The GUI filter gets a reference to the library, so that it can
+        // announce when its count changes.
+        filters[filters.length - 1] = new SeedLibraryFilter(this);
+    }
+
+    public void updateSeedCount() {
+        setSeedCount(getGUIFilter().getCount(deepContents.values()));
+    }
+
+    public void setSeedCount(int new_count) {
+        seeds_available = new_count;
+
+        // Notify all players with the library open that the seed count has
+        // changed.
+        if (listeners != null && !MinecraftForge.isClient()) {
+            for (Object listener : listeners) {
+                if (listener instanceof EntityPlayer) {
+                    byte[] data = new byte[1];
+                    if (new_count > 100) {
+                        data[0] = (byte)100;
+                    } else {
+                        data[0] = (byte)new_count;
+                    }
+                    NetworkManager net = mod_SeedManager.instance.getNetManager((EntityPlayer)listener);
+
+                    MinecraftForge.sendPacket(net, mod_SeedManager.instance,
+                                              (short)1, data);
+                }
+            }
+        }
+    }
+
+    public void updateGUIFilter() {
+        // Notify all players with the library open that the GUI filter has
+        // changed.
+        if (listeners != null && !MinecraftForge.isClient()) {
+            for (Object listener : listeners) {
+                if (listener instanceof EntityPlayer) {
+                    NBTTagCompound nbt = new NBTTagCompound();
+
+                    getGUIFilter().writeToNBT(nbt);
+
+                    byte[] data = new byte[0];
+
+                    try {
+                        ByteArrayOutputStream byter = new ByteArrayOutputStream();
+                        GZIPOutputStream zipper = new GZIPOutputStream(byter);
+                        DataOutputStream out = new DataOutputStream(zipper);
+                        //DataOutputStream out = new DataOutputStream(byter);
+                        NBTBase.writeNamedTag(nbt, out);
+                        out.close();
+
+                        data = byter.toByteArray();
+                    } catch (IOException e) {}
+
+                    NetworkManager net = mod_SeedManager.instance.getNetManager((EntityPlayer)listener);
+
+                    MinecraftForge.sendPacket(net, mod_SeedManager.instance,
+                                              (short)2, data);
+                }
+            }
         }
     }
 
@@ -48,15 +124,19 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     }
 
     public void importFromInventory() {
+        getGUIFilter().bulk_mode = true;
         for (int i=0; i<9; i++) {
             if (SeedAnalyzerTileEntity.isSeed(inventory[i])) {
                 storeSeeds(inventory[i]);
                 inventory[i] = null;
             }
         }
+        getGUIFilter().bulk_mode = false;
+        updateSeedCount();
     }
 
     public void exportToInventory() {
+        getGUIFilter().bulk_mode = true;
         for (int i=0; i<9; i++) {
             if (inventory[i] == null) {
                 // Get a seed from the active filter.
@@ -75,6 +155,8 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
                 removeSeeds(inventory[i]);
             }
         }
+        getGUIFilter().bulk_mode = false;
+        updateSeedCount();
     }
 
     public SeedLibraryFilter getGUIFilter() {
@@ -83,6 +165,86 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
 
     public int getGUISeedCount() {
         return filters[6].getCount(deepContents.values());
+    }
+
+    public void handleGuiButton(int button, boolean rightClick) {
+        if (worldObj.isRemote) {
+            byte[] data = new byte[2];
+            data[0] = (byte) button;
+            data[1] = (byte) (rightClick ? 1 : 0);
+
+            NetworkManager net = mod_SeedManager.instance.getNetManager(null);
+            MinecraftForge.sendPacket(net, mod_SeedManager.instance, (short)0,
+                                      data);
+
+            return;
+        }
+
+        if (button == 0) {
+            importFromInventory();
+        } else if (button == 1) {
+            exportToInventory();
+        } else if (button == 2) {
+            SeedLibraryFilter filter = getGUIFilter();
+            filter.allow_unknown_type = !filter.allow_unknown_type;
+            filter.settingsChanged();
+        } else if (button == 3) {
+            SeedLibraryFilter filter = getGUIFilter();
+            filter.allow_unknown_ggr = !filter.allow_unknown_ggr;
+            filter.settingsChanged();
+        } else if (button < 10) {
+            int dir = button - 4;
+            if (rightClick) {
+                filters[dir].copyFrom(filters[6]);
+            } else {
+                filters[6].copyFrom(filters[dir]);
+            }
+        }
+    }
+
+    public void handleGuiSlider(int slider, int value) {
+        if (worldObj.isRemote) {
+            byte[] data = new byte[2];
+            data[0] = (byte) slider;
+            data[1] = (byte) value;
+
+            NetworkManager net = mod_SeedManager.instance.getNetManager(null);
+            MinecraftForge.sendPacket(net, mod_SeedManager.instance, (short)1,
+                                      data);
+
+            return;
+        }
+
+        SeedLibraryFilter filter = getGUIFilter();
+        int bar = slider / 2;
+        int arrow = slider % 2;
+        if (bar == 0) {
+            if (arrow == 0) {
+                filter.min_growth = value;
+            } else {
+                filter.max_growth = value;
+            }
+        } else if (bar == 1) {
+            if (arrow == 0) {
+                filter.min_gain = value;
+            } else {
+                filter.max_gain = value;
+            }
+        } else if (bar == 2) {
+            if (arrow == 0) {
+                filter.min_resistance = value;
+            } else {
+                filter.max_resistance = value;
+            }
+        } else { // if (bar == 3)
+            if (arrow == 0) {
+                filter.min_total = value * 3;
+            } else {
+                filter.max_total = value * 3;
+            }
+        }
+
+        filter.settingsChanged();
     }
 
     public ItemStack getResearchSeed() {
@@ -275,13 +437,12 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             return false;
         }
 
-        if (!doAdd) {
-            return true;
+        if (doAdd) {
+            storeSeeds(stack);
+            stack.stackSize = 0;
+
+            updateSeedCount();
         }
-
-        storeSeeds(stack);
-
-        stack.stackSize = 0;
 
         return true;
     }
@@ -310,6 +471,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             extracted.stackSize = 1;
             if (doRemove) {
                 removeSeeds(extracted);
+                updateSeedCount();
             }
 
             return extracted;

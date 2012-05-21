@@ -2,6 +2,8 @@ import java.util.Random;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.BlockContainer;
 import java.util.ArrayList;
+import net.minecraft.src.forge.MinecraftForge;
+import net.minecraft.src.NetworkManager;
 import net.minecraft.src.IInventory;
 import net.minecraft.src.EntityItem;
 import net.minecraft.src.ItemStack;
@@ -12,9 +14,6 @@ import net.minecraft.src.ModLoader;
 import net.minecraft.src.World;
 import net.minecraft.src.forge.ITextureProvider;
 import net.minecraft.src.ic2.api.Items;
-import net.minecraft.src.ic2.common.ContainerElectricMachine;
-import net.minecraft.src.ic2.common.IHasGui;
-import net.minecraft.src.ic2.platform.Platform;
 
 public class SeedManagerBlock extends BlockContainer implements ITextureProvider {
     private Random random = new Random();
@@ -33,15 +32,24 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
         {
             return false;
         }
-        TileEntity seedmanager = world.getBlockTileEntity(i, j, k);
-        if (seedmanager != null)
-        {
-            if (seedmanager instanceof SeedLibraryTileEntity) {
-                ModLoader.getMinecraftInstance().displayGuiScreen(new SeedLibraryGUI(entityplayer.inventory, seedmanager));
-            } else if (seedmanager instanceof SeedAnalyzerTileEntity) {
-                ModLoader.getMinecraftInstance().displayGuiScreen(new SeedAnalyzerGUI((ContainerElectricMachine) ((IHasGui)seedmanager).getGuiContainer(entityplayer)));
+
+        TileEntity te = world.getBlockTileEntity(i, j, k);
+        if (world.isRemote) {
+            if (te instanceof SeedLibraryTileEntity) {
+                mod_SeedManager.instance.setRemoteLibrary((SeedLibraryTileEntity) te);
             }
+            return true;
         }
+
+        if (te instanceof SeedLibraryTileEntity && !MinecraftForge.isClient()) {
+            SeedLibraryTileEntity library = (SeedLibraryTileEntity) te;
+            mod_SeedManager mod = mod_SeedManager.instance;
+            NetworkManager net = mod.getNetManager(entityplayer);
+            byte[] data = new byte[1];
+            data[0] = (byte) (library.energy > 0 ? 1 : 0);
+            MinecraftForge.sendPacket(net, mod, (short)0, data);
+        }
+        entityplayer.openGui(mod_SeedManager.instance, 0, world, i, j, k);
         return true;
     }
 

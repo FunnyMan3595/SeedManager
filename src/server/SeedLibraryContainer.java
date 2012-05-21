@@ -1,5 +1,6 @@
 import net.minecraft.src.Container;
 import net.minecraft.src.EntityPlayer;
+import net.minecraft.src.ICrafting;
 import net.minecraft.src.IInventory;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.Slot;
@@ -7,11 +8,17 @@ import java.util.List;
 
 public class SeedLibraryContainer extends Container
 {
-    private SeedLibraryTileEntity seedlibrary;
+    public SeedLibraryTileEntity seedlibrary;
 
     public SeedLibraryContainer(IInventory iinventory, SeedLibraryTileEntity seedmanager)
     {
         seedlibrary = seedmanager;
+
+        if (seedlibrary.listeners != null) {
+            crafters = seedlibrary.listeners;
+        } else {
+            seedlibrary.listeners = crafters;
+        }
 
         for (int i = 0; i < 9; i++)
         {
@@ -88,5 +95,17 @@ public class SeedLibraryContainer extends Container
             }
         }
         return itemstack;
+    }
+
+    public void onCraftGuiOpened(ICrafting crafter) {
+        super.onCraftGuiOpened(crafter);
+
+        seedlibrary.updateSeedCount();
+        seedlibrary.updateGUIFilter();
+    }
+
+    public void onCraftGuiClosed(EntityPlayer player) {
+        super.onCraftGuiClosed(player);
+        crafters.remove(player);
     }
 }

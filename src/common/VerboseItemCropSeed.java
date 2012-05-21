@@ -14,24 +14,13 @@ public class VerboseItemCropSeed extends ItemCropSeed {
     }
 
     public void addInformation(ItemStack stack, List list) {
+        super.addInformation(stack, list);
         if (getScannedFromStack(stack) == 4) {
             int growth = getGrowthFromStack(stack);
             int gain = getGainFromStack(stack);
             int resistance = getResistanceFromStack(stack);
-            list.add(green + "Gr " + pad(growth, green));
-            list.add(green + "Ga " + pad(gain, green));
-            list.add(green + "Re " + pad(resistance, green));
             int total = growth + gain + resistance;
-            list.add(yellow + "Lv " + pad(total, yellow));
+            list.add(yellow + "Lv " + total);
         }
     }
-
-    public String pad(int number, String normal_color) {
-        if (number >= 10) {
-            return "" + number;
-        } else {
-            return black + "0" + normal_color + number;
-        }
-    }
-
 }

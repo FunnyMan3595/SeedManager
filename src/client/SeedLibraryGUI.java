@@ -84,26 +84,7 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected void actionPerformed(GuiButton guibutton)
     {
-        if (guibutton.id == 0) {
-            seedlibrary.importFromInventory();
-        } else if (guibutton.id == 1) {
-            seedlibrary.exportToInventory();
-        } else if (guibutton.id == 2) {
-            SeedLibraryFilter filter = seedlibrary.getGUIFilter();
-            filter.allow_unknown_type = !filter.allow_unknown_type;
-            filter.settingsChanged();
-        } else if (guibutton.id == 3) {
-            SeedLibraryFilter filter = seedlibrary.getGUIFilter();
-            filter.allow_unknown_ggr = !filter.allow_unknown_ggr;
-            filter.settingsChanged();
-        } else if (guibutton.id < 10) {
-            int dir = guibutton.id - 4;
-            if (rightClick) {
-                seedlibrary.filters[dir].copyFrom(seedlibrary.filters[6]);
-            } else {
-                seedlibrary.filters[6].copyFrom(seedlibrary.filters[dir]);
-            }
-        }
+        seedlibrary.handleGuiButton(guibutton.id, rightClick);
         super.actionPerformed(guibutton);
     }
 
@@ -142,7 +123,7 @@ public class SeedLibraryGUI extends GuiContainer
         drawCenteredString("Total", center + main_width / 4, 
                            top + 2 + (9 + 11)*3, 0x404040);
 
-        String count = seedlibrary.getGUISeedCount() + "";
+        String count = seedlibrary.seeds_available + "";
         drawCenteredString(count, 108, 88, 0x404040);
         drawCenteredString("Seeds", 108, 97, 0x404040);
 
@@ -385,36 +366,7 @@ public class SeedLibraryGUI extends GuiContainer
 
 
     public void setSliderValue(int slider, int value) {
-        SeedLibraryFilter filter = seedlibrary.getGUIFilter();
-        int bar = slider / 2;
-        int arrow = slider % 2;
-        if (bar == 0) {
-            if (arrow == 0) {
-                filter.min_growth = value;
-            } else {
-                filter.max_growth = value;
-            }
-        } else if (bar == 1) {
-            if (arrow == 0) {
-                filter.min_gain = value;
-            } else {
-                filter.max_gain = value;
-            }
-        } else if (bar == 2) {
-            if (arrow == 0) {
-                filter.min_resistance = value;
-            } else {
-                filter.max_resistance = value;
-            }
-        } else { // if (bar == 3)
-            if (arrow == 0) {
-                filter.min_total = value * 3;
-            } else {
-                filter.max_total = value * 3;
-            }
-        }
-
-        filter.settingsChanged();
+        seedlibrary.handleGuiSlider(slider, value);
     }
 
 

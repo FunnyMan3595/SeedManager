@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Vector;
 
 public class SeedLibraryFilter {
+    public SeedLibraryTileEntity library = null;
+    public boolean bulk_mode = false;
     public boolean allow_unknown_type = true;
     public boolean allow_unknown_ggr = true;
     public int seed_type = -1;
@@ -23,6 +25,10 @@ public class SeedLibraryFilter {
     public static final int CACHE_SIZE = 10;
     public Vector<ItemStack> cache = new Vector<ItemStack>(CACHE_SIZE+1);
     public boolean cached_nothing = false;
+
+    public SeedLibraryFilter(SeedLibraryTileEntity owner) {
+        library = owner;
+    }
 
     public void copyFrom(SeedLibraryFilter source) {
         allow_unknown_type = source.allow_unknown_type;
@@ -72,16 +78,25 @@ public class SeedLibraryFilter {
     public void newSeed(ItemStack seed) {
         if (isMatch(seed)) {
             addToCache(seed);
+            updateSeedCount();
         }
     }
 
     public void lostSeed(ItemStack seed) {
-        removeFromCache(seed);
+        if (isMatch(seed)) {
+            removeFromCache(seed);
+            updateSeedCount();
+        }
     }
 
     public void settingsChanged() {
         cache.clear();
         cached_nothing = false;
+
+        if (library != null) {
+            updateSeedCount();
+            library.updateGUIFilter();
+        }
     }
 
     public boolean isMatch(ItemStack seed) {
@@ -151,8 +166,19 @@ public class SeedLibraryFilter {
     protected void fillCache(Collection<ItemStack> seeds) {
         cache.clear();
 
+        bulk_mode = true;
         for (ItemStack seed : seeds) {
             newSeed(seed);
+        }
+        bulk_mode = false;
+
+        updateSeedCount();
+    }
+
+    protected void updateSeedCount() {
+        if (!bulk_mode && library != null && library.listeners != null
+            && library.listeners.size() > 0) {
+            library.updateSeedCount();
         }
     }
 
