@@ -1,15 +1,37 @@
 import net.minecraft.src.GuiButton;
 import net.minecraft.src.GuiContainer;
+import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.InventoryPlayer;
 import net.minecraft.src.TileEntity;
-import net.minecraft.client.Minecraft;
+import net.minecraft.src.ModLoader;
 import net.minecraft.src.ic2.platform.GuiIconButton;
 import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.List;
+import org.lwjgl.input.Mouse;
 
 public class SeedLibraryGUI extends GuiContainer
 {
+    public final String BLACK = "\u00A70";
+    public final String DARK_BLUE = "\u00A71";
+    public final String DARK_GREEN = "\u00A72";
+    public final String DARK_AQUA = "\u00A73";
+    public final String DARK_RED = "\u00A74";
+    public final String DARK_PURPLE = "\u00A75";
+    public final String GOLD = "\u00A76";
+    public final String GRAY = "\u00A77";
+    public final String DARK_GRAY = "\u00A78";
+    public final String BLUE = "\u00A79";
+    public final String GREEN = "\u00A7A";
+    public final String AQUA = "\u00A7B";
+    public final String RED = "\u00A7C";
+    public final String LIGHT_PURPLE = "\u00A7D";
+    public final String YELLOW = "\u00A7E";
+    public final String WHITE = "\u00A7F";
+
+    public int mouseX = -1;
+    public int mouseY = -1;
+
     protected List realControls = null;
     protected List noControls = new ArrayList();
     private static java.lang.reflect.Field textureY = null;
@@ -170,7 +192,83 @@ public class SeedLibraryGUI extends GuiContainer
 
         fontRenderer.drawString("Inventory", 8, (ySize - 96) + 2, 0x404040);
 
+        List<String> tooltip = getTooltip(mouseX, mouseY);
+        if (tooltip != null && tooltip.size() > 0) {
+            showTooltip(mouseX, mouseY, tooltip);
+        }
+
         super.drawGuiContainerForegroundLayer();
+    }
+
+    public List<String> getTooltip(int x, int y) {
+        ArrayList<String> tooltip = new ArrayList<String>();
+
+        int slider;
+        if (current_slider != -1) {
+            slider = current_slider;
+        } else {
+            slider = getSliderAt(x, y);
+        }
+
+        if (slider != -1) {
+            tooltip.add(getSliderName(slider) + WHITE + ":");
+            int value = getSliderValue(slider);
+            if (slider > 5) {
+                value *= 3;
+            }
+            tooltip.add("" + value);
+        }
+
+        return tooltip;
+    }
+
+    public void showTooltip(int x, int y, List<String> contents) {
+        int width = 0;
+        for (String line : contents) {
+            width = Math.max(width, fontRenderer.getStringWidth(line));
+        }
+
+        int left = x - guiLeft + 12;
+        int top = y - guiTop - 12;
+
+        int height = contents.size() * 10 - 2;
+
+        int bkg = -267386864;
+
+        // Ensure we're on top of everything else.
+        zLevel = 300;
+
+        // Top line
+        drawGradientRect(left - 3, top - 4, left + width + 3, top - 3, bkg, bkg);
+
+        // Bottom line
+        drawGradientRect(left - 3, top + height + 3, left + width + 3, top + height + 4, bkg, bkg);
+
+        // Main background
+        drawGradientRect(left - 3, top - 3, left + width + 3, top + height + 3, bkg, bkg);
+
+        // Left line
+        drawGradientRect(left - 4, top - 3, left - 3, top + height + 3, bkg, bkg);
+
+        // Right line
+        drawGradientRect(left + width + 3, top - 3, left + width + 4, top + height + 3, bkg, bkg);
+
+        int border_1 = 1347420415;
+        int border_2 = (border_1 & 16711422) >> 1 | border_1 & -16777216;
+
+        // Borders
+        drawGradientRect(left - 3, top - 3 + 1, left - 3 + 1, top + height + 3 - 1, border_1, border_2);
+        drawGradientRect(left + width + 2, top - 3 + 1, left + width + 3, top + height + 3 - 1, border_1, border_2);
+        drawGradientRect(left - 3, top - 3, left + width + 3, top - 3 + 1, border_1, border_1);
+        drawGradientRect(left - 3, top + height + 2, left + width + 3, top + height + 3, border_2, border_2);
+
+        for (String line : contents) {
+            fontRenderer.drawStringWithShadow(line, left, top, -1);
+            top += 10;
+        }
+
+        // Return to normal GUI Z level.
+        zLevel = 0;
     }
 
     protected void drawGuiContainerBackgroundLayer(float f, int i, int j)
@@ -279,59 +377,85 @@ public class SeedLibraryGUI extends GuiContainer
             rightClick = false;
         }
 
-        int screen_x = x;
-        int screen_y = y;
         if (button == 0) {
             // LMB down.
 
-            // Adjust for GUI coordinates.
-            x -= guiLeft;
-            y -= guiTop;
-
             // Set current slider to what's under the mouse, so it can track.
-            if (x < (sliders_x - 2) || y < sliders_y) {
-                current_slider = -1;
-                return; // Above or left of the bars.
-            }
+            current_slider = getSliderAt(x, y);
 
-            x -= sliders_x;
-            y -= sliders_y;
-
-            int bar = y / sliders_spacing;
-            int remainder = y % sliders_spacing;
-            if (bar > 3 || remainder >= 10) {
-                current_slider = -1;
-                return; // Below the bars.
-            }
-
-            int min = getSliderValue(bar*2);
-            int max = getSliderValue(bar*2 + 1);
-
-            if (x < min * 2 - 2) {
-                // Left of both arrows.
-                current_slider = -1;
-            } else if (x <= min * 2) {
-                // Over the minimum arrow.
-                current_slider = bar * 2;
-            } else if (x < max * 2) {
-                // Between the arrows.
-                current_slider = -1;
-            } else if (x <= max * 2 + 2) {
-                // Over the maximum arrow;
-                current_slider = bar * 2 + 1;
-            } else {
-                // Right of both arrows.
-                current_slider = -1;
-            }
-
+            // And if there is one, keep track of the starting point as well.
             if (current_slider != -1) {
-                drag_start_x = screen_x;
+                drag_start_x = x;
                 drag_start_value = getSliderValue(current_slider);
             }
         }
     }
 
 
+    public int getSliderAt(int x, int y) {
+        // Adjust for GUI coordinates.
+        x -= guiLeft;
+        y -= guiTop;
+
+        if (x < (sliders_x - 2) || y < sliders_y) {
+            // Above or left of the bars.
+            return -1;
+        }
+
+        x -= sliders_x;
+        y -= sliders_y;
+
+        int bar = y / sliders_spacing;
+        int remainder = y % sliders_spacing;
+        if (bar > 3 || remainder >= 10) {
+            // Below or between the bars.
+            return -1;
+        }
+
+        int min = getSliderValue(bar*2);
+        int max = getSliderValue(bar*2 + 1);
+
+        if (x < min * 2 - 2) {
+            // Left of both arrows.
+            return -1;
+        } else if (x <= min * 2) {
+            // Over the minimum arrow.
+            return bar * 2;
+        } else if (x < max * 2) {
+            // Between the arrows.
+            return -1;
+        } else if (x <= max * 2 + 2) {
+            // Over the maximum arrow;
+            return bar * 2 + 1;
+        } else {
+            // Right of both arrows.
+            return -1;
+        }
+    }
+
+    public String getSliderName(int slider) {
+        String name;
+        int bar = slider / 2;
+        int arrow = slider % 2;
+
+        if (arrow == 0) {
+            name = "Minimum ";
+        } else {
+            name = "Maximum ";
+        }
+
+        if (bar == 0) {
+            name += DARK_GREEN + "Growth";
+        } else if (bar == 1) {
+            name += GOLD + "Gain";
+        } else if (bar == 2) {
+            name += AQUA + "Resistance";
+        } else { // bar == 3
+            name += YELLOW + "Total";
+        }
+
+        return name;
+    }
 
     public int getSliderValue(int slider) {
         SeedLibraryFilter filter = seedlibrary.getGUIFilter();
@@ -372,6 +496,10 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected void mouseMovedOrUp(int x, int y, int button) {
         super.mouseMovedOrUp(x, y, button);
+
+        mouseX = x;
+        mouseY = y;
+
         if (rightSelect != null && button == 1) {
             // Release a button pressed with RMB.
             rightSelect.mouseReleased(x, y);

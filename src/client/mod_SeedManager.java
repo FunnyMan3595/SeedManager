@@ -102,7 +102,7 @@ public class mod_SeedManager extends NetworkMod implements IConnectionHandler {
     }
 
     public String getVersion() {
-        return "v2.0";
+        return "v2.4";
     }
 
     public String getPriorities() {

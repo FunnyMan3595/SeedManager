@@ -50,6 +50,13 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         filters[filters.length - 1] = new SeedLibraryFilter(this);
     }
 
+    public void updateCountIfMatch(ItemStack seed) {
+        SeedLibraryFilter filter = getGUIFilter();
+        if (!filter.bulk_mode && filter.isMatch(seed)) {
+            updateSeedCount();
+        }
+    }
+
     public void updateSeedCount() {
         setSeedCount(getGUIFilter().getCount(deepContents.values()));
     }
@@ -265,8 +272,11 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         String key = getKey(seeds);
         ItemStack stored = deepContents.get(key);
         if (stored != null) {
-            // Found a pre-existing stack.  Using it will update everyone.
+            // Found a pre-existing stack.  Using it will update everything...
             stored.stackSize += seeds.stackSize;
+
+            // ...except the GUI's seed count, so update that now.
+            updateCountIfMatch(stored);
         } else {
             // No pre-existing stack.  Make a new one.
             stored = seeds.copy();
@@ -308,6 +318,9 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
                 for (SeedLibraryFilter filter : filters) {
                     filter.lostSeed(stored);
                 }
+            } else {
+                // All we need to do is update the GUI count.
+                updateCountIfMatch(stored);
             }
         }
     }
@@ -440,8 +453,6 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         if (doAdd) {
             storeSeeds(stack);
             stack.stackSize = 0;
-
-            updateSeedCount();
         }
 
         return true;
@@ -471,7 +482,6 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             extracted.stackSize = 1;
             if (doRemove) {
                 removeSeeds(extracted);
-                updateSeedCount();
             }
 
             return extracted;
