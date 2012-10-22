@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.minecraft.src.forge.MinecraftForge;
 import net.minecraft.src.NetworkManager;
 import net.minecraft.src.IInventory;
+import net.minecraft.src.IBlockAccess;
 import net.minecraft.src.EntityItem;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.TileEntity;
@@ -16,7 +17,19 @@ import net.minecraft.src.forge.ITextureProvider;
 import net.minecraft.src.ic2.api.Items;
 
 public class SeedManagerBlock extends BlockContainer implements ITextureProvider {
-    private Random random = new Random();
+    // Which side should get the front texture if we don't know?
+    public static final int DEFAULT_FRONT_SIDE = 3;
+
+    // An uninteresting side (i.e. not front, top, or bottom).
+    public static final int DEFAULT_NON_FRONT_SIDE = 2;
+
+    public static final byte DATA_ANALYZER_OFF = 0;
+    public static final byte DATA_LIBRARY_OFF = 1;
+
+    public static final byte DATA_ANALYZER_ON = 9;
+    public static final byte DATA_LIBRARY_ON = 10;
+
+    public Random random = new Random();
 
     public SeedManagerBlock(int id) {
         super(id, 0, Material.iron);
@@ -58,15 +71,101 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
     }
 
     public TileEntity getBlockEntity(int data) {
-        if (data == 0) {
+        if (data == DATA_ANALYZER_OFF || data == DATA_ANALYZER_ON) {
             return new SeedAnalyzerTileEntity();
-        } else { // data == 1
+        } else if (data == DATA_LIBRARY_OFF || data == DATA_LIBRARY_ON) {
             return new SeedLibraryTileEntity();
+        } else {
+            return null;
         }
     }
 
+    /**
+     * Retrieves the block texture to use based on the display side. Args: iBlockAccess, x, y, z, side
+     * YNeg=0
+     * YPos=1
+     * ZNeg=2
+     * ZPos=3
+     * XNeg=4
+     * XPos=5
+     */
+    public int getBlockTexture(IBlockAccess world, int x, int y, int z, int side)
+    {
+        int row = 0;
+        int col = 0;
+
+        TileEntity te = world.getBlockTileEntity(x,y,z);
+
+        if (te instanceof SeedAnalyzerTileEntity) {
+            SeedAnalyzerTileEntity analyzer = (SeedAnalyzerTileEntity) te;
+
+            if (side == 1) {
+                row = 2;
+                if (analyzer.isSeed(analyzer.inventory[0])) {
+                    col = 1;
+                }
+            } else if (side == 0) {
+                row = 3;
+            } else if (side == analyzer.front) {
+                if (analyzer.energy > 0) {
+                    if (analyzer.canOperate()) {
+                        col = 2;
+                    } else {
+                        col = 1;
+                    }
+                }
+            } else {
+                row = 1;
+            }
+
+            int tex = row*16 + col;
+            return tex;
+        } else if (te instanceof SeedLibraryTileEntity) {
+            SeedLibraryTileEntity library = (SeedLibraryTileEntity) te;
+
+            // For the library, we just fix the side index to match the default
+            // front side, then fall through to the metadata-based version.
+            if (side > 1) { // Not top or bottom.
+                if (side == library.front) {
+                    side = DEFAULT_FRONT_SIDE;
+                } else {
+                    side = DEFAULT_NON_FRONT_SIDE;
+                }
+            }
+        }
+
+        return getBlockTextureFromSideAndMetadata(side, world.getBlockMetadata(x, y, z));
+    }
+
     public int getBlockTextureFromSideAndMetadata(int side, int data) {
-        return data;
+        int x;
+        int y;
+
+        if (data == DATA_ANALYZER_OFF) {
+            x = 0;
+            y = 0;
+        } else if (data == DATA_ANALYZER_ON) {
+            x = 1;
+            y = 0;
+        } else if (data == DATA_LIBRARY_OFF) {
+            x = 0;
+            y = 4;
+        } else { // data == DATA_LIBRARY_ON
+            x = 1;
+            y = 4;
+        }
+
+        if (side == 0) {
+            y += 3;
+        } else if (side == 1) {
+            y += 2;
+        } else if (side == DEFAULT_FRONT_SIDE) {
+            y += 0;
+        } else {
+            y += 1;
+        }
+
+        return y*16 + x;
     }
 
     public String getTextureFile() {
@@ -122,7 +221,7 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
 
     public void addCreativeItems(ArrayList arraylist)
     {
-        arraylist.add(new ItemStack(this, 1, 0));
-        arraylist.add(new ItemStack(this, 1, 1));
+        arraylist.add(new ItemStack(this, 1, DATA_ANALYZER_OFF));
+        arraylist.add(new ItemStack(this, 1, DATA_LIBRARY_OFF));
     }
 }

@@ -89,7 +89,7 @@ public class mod_SeedManager extends NetworkMod {
     }
 
     public String getVersion() {
-        return "v2.4";
+        return "v3.0";
     }
 
     public String getPriorities() {

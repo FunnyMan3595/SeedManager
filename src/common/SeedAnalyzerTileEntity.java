@@ -8,6 +8,12 @@ import net.minecraft.src.ic2.api.Items;
 public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
     public static final int[] cost_to_upgrade = {10, 90, 900, 9000};
     public static final int cost_reduction = 2;
+    public int front = 3;
+
+    // This keeps track of the analyzer's internal state.  When it changes, a
+    // metadata change is forced (even if not needed) so that the graphics
+    // update.
+    public int state = 0;
     public SeedAnalyzerTileEntity()
     {
         super(3, 5, 2000/cost_reduction, 32);
@@ -127,6 +133,38 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
         defaultOperationLength = cost_to_upgrade[scan] /
                                  (defaultEnergyConsume * cost_reduction);
         return true;
+    }
+
+    public void updateEntity() {
+        super.updateEntity();
+
+        int new_state = 0;
+        if (energy > 0) {
+            new_state += 1;
+        } 
+        if (isSeed(inventory[0])) {
+            new_state += 2;
+        }
+        if (canOperate()) {
+            new_state += 4;
+        }
+
+        if (new_state != state) {
+            state = new_state;
+            setMetadata();
+        }
+    }
+
+    public void setMetadata() {
+        int correctData;
+        if (energy > 0) {
+            correctData = SeedManagerBlock.DATA_ANALYZER_ON;
+        } else {
+            correctData = SeedManagerBlock.DATA_ANALYZER_OFF;
+        }
+
+        worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, correctData);
+        worldObj.markBlocksDirty(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
     }
 
     public String getInvName() {

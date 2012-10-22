@@ -38,6 +38,8 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     // The number of seeds that match the GUI filter.
     public int seeds_available = 0;
 
+    public int front = 3;
+
     public SeedLibraryTileEntity() {
         super(9, 0, 200, 32);
 
@@ -121,12 +123,27 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         super.updateEntity();
         if (Platform.isSimulating())
         {
+            checkMetadata();
             if (energy > 0) {
                 energy--;
             }
             if (energy < maxEnergy) {
                 provideEnergy();
             }
+        }
+    }
+
+    public void checkMetadata() {
+        int correctData;
+        if (energy > 0) {
+            correctData = SeedManagerBlock.DATA_LIBRARY_ON;
+        } else {
+            correctData = SeedManagerBlock.DATA_LIBRARY_OFF;
+        }
+
+        if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) != correctData) {
+            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, correctData);
+            worldObj.markBlocksDirty(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
         }
     }
 

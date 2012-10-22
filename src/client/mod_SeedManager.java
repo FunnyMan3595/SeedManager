@@ -102,7 +102,7 @@ public class mod_SeedManager extends NetworkMod implements IConnectionHandler {
     }
 
     public String getVersion() {
-        return "v2.4";
+        return "v3.0";
     }
 
     public String getPriorities() {
@@ -166,5 +166,9 @@ public class mod_SeedManager extends NetworkMod implements IConnectionHandler {
 
     public void setRemoteLibrary(SeedLibraryTileEntity library) {
         remoteSeedLibrary = library;
+    }
+
+    public void registerAnimation(Minecraft mc) {
+        ModLoader.addAnimation(new SeedAnalyzerFX());
     }
 }

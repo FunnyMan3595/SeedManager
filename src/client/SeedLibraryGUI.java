@@ -77,14 +77,14 @@ public class SeedLibraryGUI extends GuiContainer
 
     public void initGui() {
         super.initGui();
-        GuiIconButton importButton = new GuiIconButton(0, guiLeft + 132, guiTop + 86, 18, 20, "fm_seedlibrary_gui.png", 176+2, 0+1);
+        GuiIconButton importButton = new GuiIconButton(0, guiLeft + 132, guiTop + 86, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 0+1);
         controlList.add(importButton);
-        GuiIconButton exportButton = new GuiIconButton(1, guiLeft + 151, guiTop + 86, 18, 20, "fm_seedlibrary_gui.png", 176+2, 18+1);
+        GuiIconButton exportButton = new GuiIconButton(1, guiLeft + 151, guiTop + 86, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 18+1);
         controlList.add(exportButton);
 
-        unk_type_button = new GuiIconButton(2, guiLeft + left + main_width/8 - 9, guiTop + middle + 20, 18, 20, "fm_seedlibrary_gui.png", 176+2, 72+1);
+        unk_type_button = new GuiIconButton(2, guiLeft + left + main_width/8 - 9, guiTop + middle + 20, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 72+1);
         controlList.add(unk_type_button);
-        unk_ggr_button = new GuiIconButton(3, guiLeft + left + (main_width*3)/8 - 9, guiTop + middle + 20, 18, 20, "fm_seedlibrary_gui.png", 176+2, 72+1);
+        unk_ggr_button = new GuiIconButton(3, guiLeft + left + (main_width*3)/8 - 9, guiTop + middle + 20, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 72+1);
         controlList.add(unk_ggr_button);
 
         int x = guiLeft + left + 3;
@@ -287,10 +287,12 @@ public class SeedLibraryGUI extends GuiContainer
         // Draw the background.
         drawTexturedModalRect(0, 0, 0, 0, xSize, ySize);
 
+        /*
         // Draw the borders for the three upper sections.
         draw3DRect(left, top, center, middle);
         draw3DRect(left, middle, center, bottom);
         draw3DRect(center, top, right, bottom);
+        */
 
         // Draw the dashed outline for getting seed types.
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);

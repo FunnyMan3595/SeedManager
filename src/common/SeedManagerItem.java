@@ -15,9 +15,11 @@ public class SeedManagerItem extends ItemBlock {
     public String getItemNameIS(ItemStack itemstack)
     {
         int i = itemstack.getItemDamage();
-        if (i == 0) {
+        if (   i == SeedManagerBlock.DATA_ANALYZER_OFF
+            || i == SeedManagerBlock.DATA_ANALYZER_ON) {
             return "tile.seedAnalyzer";
-        } else if (i == 1) {
+        } else if (   i == SeedManagerBlock.DATA_LIBRARY_OFF
+            || i == SeedManagerBlock.DATA_LIBRARY_ON) {
             return "tile.seedLibrary";
         } else {
             return "tile.seedManager";
