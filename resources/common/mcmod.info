@@ -1,0 +1,17 @@
+[
+{
+  "modid" : "IC2.SeedManager",
+  "name" : "SeedManager",
+  "version" : "3.0",
+  "url" : "http://forum.industrial-craft.net/index.php?page=Thread&threadID=5152",
+  "authors": [
+     "FunnyMan3595"
+  ],
+  "description": "Adds a static (block form) seed analyzer and storage facility for IC2 seed bags.",
+  "logoFile" : "",
+  "updateUrl" : "",
+  "parent" : "",
+  "screenshots": [
+  ]
+}
+]
