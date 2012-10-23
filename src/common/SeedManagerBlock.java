@@ -2,9 +2,9 @@ import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.Side;
 import ic2.api.Items;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 import net.minecraft.src.BlockContainer;
+import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.EntityItem;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.IBlockAccess;
@@ -39,6 +39,13 @@ public class SeedManagerBlock extends BlockContainer {
         setResistance(10F);
         setStepSound(soundMetalFootstep);
         setBlockName("seedManager");
+        setCreativeTab(CreativeTabs.tabDecorations);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void getSubBlocks(int id, CreativeTabs type, List tabContents) {
+        tabContents.add(new ItemStack(id, 1, DATA_ANALYZER_OFF));
+        tabContents.add(new ItemStack(id, 1, DATA_LIBRARY_OFF));
     }
 
     public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer player, int side, float hit_x, float hit_y, float hit_z)
@@ -220,11 +227,5 @@ public class SeedManagerBlock extends BlockContainer {
 
     protected int damageDropped(int data) {
         return 0;
-    }
-
-    public void addCreativeItems(ArrayList arraylist)
-    {
-        arraylist.add(new ItemStack(this, 1, DATA_ANALYZER_OFF));
-        arraylist.add(new ItemStack(this, 1, DATA_LIBRARY_OFF));
     }
 }

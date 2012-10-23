@@ -76,8 +76,7 @@ public class SeedManager {
         } catch (RuntimeException e) {} // Just regenerate the config if it's
                                         // broken.
         String id_strs[] = {
-            config.getOrCreateIntProperty("seed.manager",
-                                          config.CATEGORY_BLOCK, 190).value,
+            config.get("seed.manager", config.CATEGORY_BLOCK, 190).value,
         };
         config.save();
 
@@ -96,7 +95,7 @@ public class SeedManager {
         GameRegistry.registerTileEntity(SeedLibraryTileEntity.class, "Seed Library");
 
         // Overwrite the IC2 crop seed with the improved version.
-        Ic2Items.cropSeed = new ItemStack(new VerboseItemCropSeed(Ic2Items.cropSeed));
+        Ic2Items.cropSeed = new ItemStack(new ExtendedCropSeed(Ic2Items.cropSeed));
 
         // Item stacks for identifying the analyzer/library
         ItemStack seedAnalyzer = new ItemStack(seedmanager, 1, 0);

@@ -75,6 +75,7 @@ public class SeedLibraryGUI extends GuiContainer
         sliders_spacing = 11 + 9;
     }
 
+    @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
         GuiIconButton importButton = new GuiIconButton(0, guiLeft + 132, guiTop + 86, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 0+1);
