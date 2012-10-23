@@ -1,5 +1,5 @@
 import net.minecraft.src.ItemStack;
-import net.minecraft.src.ic2.common.ItemCropSeed;
+import ic2.common.ItemCropSeed;
 
 public class SeedLibrarySort implements java.util.Comparator<ItemStack> {
     public static final int NO_SORT = -1;

@@ -1,5 +1,5 @@
-import net.minecraft.src.ic2.common.ContainerElectricMachine;
-import net.minecraft.src.ic2.common.TileEntityElectricMachine;
+import ic2.common.ContainerElectricMachine;
+import ic2.common.TileEntityElectricMachine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;

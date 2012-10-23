@@ -1,5 +1,5 @@
-import net.minecraft.src.ic2.common.ItemCropSeed;
-import net.minecraft.src.ic2.common.Ic2Items;
+import ic2.common.ItemCropSeed;
+import ic2.common.Ic2Items;
 import net.minecraft.src.ItemStack;
 import java.util.List;
 

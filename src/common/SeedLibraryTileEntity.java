@@ -1,39 +1,36 @@
+import buildcraft.api.core.Orientations;
+import buildcraft.api.inventory.ISpecialInventory;
+import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.Side;
+import ic2.api.CropCard;
+import ic2.api.Items;
+import ic2.api.IWrenchable;
+import ic2.common.IC2;
+import ic2.common.ItemCropSeed;
+import ic2.common.TileEntityElecMachine;
 import java.io.ByteArrayOutputStream;
-import java.util.zip.GZIPOutputStream;
-import java.io.IOException;
 import java.io.DataOutputStream;
-import java.util.Random;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Vector;
-import net.minecraft.src.forge.MinecraftForge;
-import net.minecraft.src.IInventory;
-import net.minecraft.src.EntityPlayer;
+import java.io.IOException;
+import java.util.*;
+import java.util.zip.GZIPOutputStream;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.src.Block;
+import net.minecraft.src.EntityPlayer;
+import net.minecraft.src.IInventory;
 import net.minecraft.src.ItemStack;
-import net.minecraft.src.TileEntity;
 import net.minecraft.src.Material;
 import net.minecraft.src.NBTBase;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
-import net.minecraft.src.forge.ITextureProvider;
 import net.minecraft.src.NetworkManager;
-import net.minecraft.src.ic2.platform.Platform;
-import net.minecraft.src.ic2.common.TileEntityElecMachine;
-import net.minecraft.src.ic2.common.ItemCropSeed;
-import net.minecraft.src.ic2.api.CropCard;
-import net.minecraft.src.ic2.api.Items;
-import net.minecraft.src.ic2.api.IWrenchable;
-import net.minecraft.src.buildcraft.api.ISpecialInventory;
-import net.minecraft.src.buildcraft.api.Orientations;
+import net.minecraft.src.Packet;
+import net.minecraft.src.TileEntity;
 
 public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWrenchable, ISpecialInventory {
     public static final boolean DEBUG_SEEDS = false;
     protected SeedLibraryFilter[] filters = new SeedLibraryFilter[7];
     protected HashMap<String, ItemStack> deepContents = new HashMap<String, ItemStack>();
     protected Vector<ItemStack> unresearched = new Vector<ItemStack>();
-
-    public List listeners = null;
 
     // The number of seeds that match the GUI filter.
     public int seeds_available = 0;
@@ -52,6 +49,32 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         filters[filters.length - 1] = new SeedLibraryFilter(this);
     }
 
+    public void sendPacketToNearby(int id, byte[] data) {
+        // Yes, this is unfriendly.
+        // But everyone would have to do it themselves otherwise.
+        data[0] = (byte)xCoord;
+        data[1] = (byte)yCoord;
+        data[2] = (byte)zCoord;
+
+        if (worldObj == null) {
+            return; // Inventory has no world.
+        }
+
+        Packet packet = PacketDispatcher.getTinyPacket(SeedManager.instance(),
+                                                       (short)id, data);
+
+        int dimension = worldObj.getWorldInfo().getDimension();
+        PacketDispatcher.sendPacketToAllAround(xCoord, yCoord, zCoord, 10,
+                                               dimension, packet);
+    }
+
+    public void sendPacketToServer(int id, byte[] data) {
+        Packet packet = PacketDispatcher.getTinyPacket(SeedManager.instance(),
+                                                       (short)id, data);
+
+        PacketDispatcher.sendPacketToServer(packet);
+    }
+
     public void updateCountIfMatch(ItemStack seed) {
         SeedLibraryFilter filter = getGUIFilter();
         if (!filter.bulk_mode && filter.isMatch(seed)) {
@@ -66,62 +89,57 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     public void setSeedCount(int new_count) {
         seeds_available = new_count;
 
-        // Notify all players with the library open that the seed count has
-        // changed.
-        if (listeners != null && !MinecraftForge.isClient()) {
-            for (Object listener : listeners) {
-                if (listener instanceof EntityPlayer) {
-                    byte[] data = new byte[1];
-                    if (new_count > 100) {
-                        data[0] = (byte)100;
-                    } else {
-                        data[0] = (byte)new_count;
-                    }
-                    NetworkManager net = mod_SeedManager.instance.getNetManager((EntityPlayer)listener);
+        // Notify all nearby players that the seed count has changed.
+        byte[] data = new byte[5];
 
-                    MinecraftForge.sendPacket(net, mod_SeedManager.instance,
-                                              (short)1, data);
-                }
-            }
+        if (new_count > 65535) {
+            new_count = 65535;
         }
+
+        data[3] = (byte) (new_count % 256);
+        data[4] = (byte) (new_count / 256);
+
+        sendPacketToNearby(1, data);
     }
 
     public void updateGUIFilter() {
-        // Notify all players with the library open that the GUI filter has
-        // changed.
-        if (listeners != null && !MinecraftForge.isClient()) {
-            for (Object listener : listeners) {
-                if (listener instanceof EntityPlayer) {
-                    NBTTagCompound nbt = new NBTTagCompound();
-
-                    getGUIFilter().writeToNBT(nbt);
-
-                    byte[] data = new byte[0];
-
-                    try {
-                        ByteArrayOutputStream byter = new ByteArrayOutputStream();
-                        GZIPOutputStream zipper = new GZIPOutputStream(byter);
-                        DataOutputStream out = new DataOutputStream(zipper);
-                        //DataOutputStream out = new DataOutputStream(byter);
-                        NBTBase.writeNamedTag(nbt, out);
-                        out.close();
-
-                        data = byter.toByteArray();
-                    } catch (IOException e) {}
-
-                    NetworkManager net = mod_SeedManager.instance.getNetManager((EntityPlayer)listener);
-
-                    MinecraftForge.sendPacket(net, mod_SeedManager.instance,
-                                              (short)2, data);
-                }
-            }
+        // Makes no sense to do this on the client side.
+        if(SeedManager.getSide() == Side.CLIENT) {
+            return;
         }
+
+        // Notify all nearby players that the GUI filter has changed.
+        NBTTagCompound nbt = new NBTTagCompound();
+
+        getGUIFilter().writeToNBT(nbt);
+
+        byte[] data;
+
+        try {
+            ByteArrayOutputStream byter = new ByteArrayOutputStream();
+
+            // Pad it for the coordinates that will be added later.
+            byter.write(0);
+            byter.write(0);
+            byter.write(0);
+
+            GZIPOutputStream zipper = new GZIPOutputStream(byter);
+            DataOutputStream out = new DataOutputStream(zipper);
+            NBTBase.writeNamedTag(nbt, out);
+            out.close();
+
+            data = byter.toByteArray();
+        } catch (IOException e) {
+            return;
+        }
+
+        sendPacketToNearby(2, data);
     }
 
     public void updateEntity()
     {
         super.updateEntity();
-        if (Platform.isSimulating())
+        if (IC2.platform.isSimulating())
         {
             checkMetadata();
             if (energy > 0) {
@@ -191,19 +209,15 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         return filters[6].getCount(deepContents.values());
     }
 
-    public void handleGuiButton(int button, boolean rightClick) {
-        if (worldObj.isRemote) {
-            byte[] data = new byte[2];
-            data[0] = (byte) button;
-            data[1] = (byte) (rightClick ? 1 : 0);
+    public void sendGuiButton(int button, boolean rightClick) {
+        byte[] data = new byte[2];
+        data[0] = (byte) button;
+        data[1] = (byte) (rightClick ? 1 : 0);
 
-            NetworkManager net = mod_SeedManager.instance.getNetManager(null);
-            MinecraftForge.sendPacket(net, mod_SeedManager.instance, (short)0,
-                                      data);
+        sendPacketToServer(0, data);
+    }
 
-            return;
-        }
-
+    public void receiveGuiButton(int button, boolean rightClick) {
         if (button == 0) {
             importFromInventory();
         } else if (button == 1) {
@@ -226,19 +240,15 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         }
     }
 
-    public void handleGuiSlider(int slider, int value) {
-        if (worldObj.isRemote) {
-            byte[] data = new byte[2];
-            data[0] = (byte) slider;
-            data[1] = (byte) value;
+    public void sendGuiSlider(int slider, int value) {
+        byte[] data = new byte[2];
+        data[0] = (byte) slider;
+        data[1] = (byte) value;
 
-            NetworkManager net = mod_SeedManager.instance.getNetManager(null);
-            MinecraftForge.sendPacket(net, mod_SeedManager.instance, (short)1,
-                                      data);
+        sendPacketToServer(1, data);
+    }
 
-            return;
-        }
-
+    public void receiveGuiSlider(int slider, int value) {
         SeedLibraryFilter filter = getGUIFilter();
         int bar = slider / 2;
         int arrow = slider % 2;
@@ -458,51 +468,59 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
 
 
     // ISpecialInventory
-    public synchronized boolean addItem(ItemStack stack, boolean doAdd, Orientations from) {
+    public synchronized int addItem(ItemStack stack, boolean doAdd, Orientations from) {
         // When out of power, input continues to work.
         // (It's assumed that this is a simple operation, and that it's the
         //  analysis and sorting for extraction that takes power.)
 
         if (stack.itemID != Items.getItem("cropSeed").itemID) {
-            return false;
+            return 0;
         }
 
         if (doAdd) {
             storeSeeds(stack);
-            stack.stackSize = 0;
         }
 
-        return true;
+        return stack.stackSize;
     }
 
-    public synchronized ItemStack extractItem(boolean doRemove, Orientations from) {
+    public synchronized ItemStack[] extractItem(boolean doRemove, Orientations from, int maxItemCount) {
         // When out of power, output is disabled.
         if (energy <= 0) {
-            return null;
+            return new ItemStack[0];
         }
 
+        if (maxItemCount < 1) {
+            return new ItemStack[0];
+        }
+
+        List<ItemStack> stacks = new ArrayList<ItemStack>();
         if (DEBUG_SEEDS && from == Orientations.YPos) {
             Random rand = new Random();
             short id = (short) (rand.nextInt(15) + 1);
             byte growth = (byte) rand.nextInt(32);
             byte gain = (byte) rand.nextInt(32);
             byte resist = (byte) rand.nextInt(32);
-            return ItemCropSeed.generateItemStackFromValues(id, growth, gain, resist, (byte)0);
+            stacks.add(ItemCropSeed.generateItemStackFromValues(id, growth, gain, resist, (byte)0));
         } else {
             int dir = from.ordinal();
             ItemStack stored = filters[dir].getSeed(deepContents.values());
-            if (stored == null) {
-                return null;
-            }
+            if (stored != null) {
+                int count = Math.min(stored.stackSize, maxItemCount);
 
-            ItemStack extracted = stored.copy();
-            extracted.stackSize = 1;
-            if (doRemove) {
-                removeSeeds(extracted);
-            }
+                for (int i=0; i<count; i++) {
+                    ItemStack extracted = stored.copy();
+                    extracted.stackSize = 1;
+                    if (doRemove) {
+                        removeSeeds(extracted);
+                    }
 
-            return extracted;
+                    stacks.add(extracted);
+                }
+            }
         }
+
+        return stacks.toArray(new ItemStack[0]);
     }
 
 

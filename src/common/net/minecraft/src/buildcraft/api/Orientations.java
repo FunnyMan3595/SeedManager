@@ -1,1 +1,0 @@
-../../../../../../../../bc3/src/common/net/minecraft/src/buildcraft/api/Orientations.java

@@ -1,3 +1,4 @@
+import net.minecraft.client.Minecraft;
 import net.minecraft.src.RenderEngine;
 import net.minecraft.src.TextureFX;
 import net.minecraft.src.TexturePackBase;
@@ -42,7 +43,7 @@ public class SeedAnalyzerFX extends TextureFX {
     public boolean checkTexturePack() {
         TexturePackBase tp = null;
         try {
-            tp = ModLoader.getMinecraftInstance().renderEngine.texturePack.selectedTexturePack;
+            tp = Minecraft.getMinecraft().renderEngine.texturePack.getSelectedTexturePack();
         } catch (Exception e) {}
 
         if (tp != null && tp != loadedPack) {

@@ -1,9 +1,9 @@
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.TileEntity;
-import net.minecraft.src.ic2.common.TileEntityElectricMachine;
-import net.minecraft.src.ic2.common.ItemCropSeed;
-import net.minecraft.src.ic2.api.Items;
+import ic2.common.TileEntityElectricMachine;
+import ic2.common.ItemCropSeed;
+import ic2.api.Items;
 
 public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
     public static final int[] cost_to_upgrade = {10, 90, 900, 9000};

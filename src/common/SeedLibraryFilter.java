@@ -1,8 +1,8 @@
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.ic2.api.CropCard;
-import net.minecraft.src.ic2.api.Items;
-import net.minecraft.src.ic2.common.ItemCropSeed;
+import ic2.api.CropCard;
+import ic2.api.Items;
+import ic2.common.ItemCropSeed;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -176,8 +176,7 @@ public class SeedLibraryFilter {
     }
 
     protected void updateSeedCount() {
-        if (!bulk_mode && library != null && library.listeners != null
-            && library.listeners.size() > 0) {
+        if (!bulk_mode && library != null) {
             library.updateSeedCount();
         }
     }

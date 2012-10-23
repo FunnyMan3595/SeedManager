@@ -14,18 +14,12 @@ public class SeedLibraryContainer extends Container
     {
         seedlibrary = seedmanager;
 
-        if (seedlibrary.listeners != null) {
-            crafters = seedlibrary.listeners;
-        } else {
-            seedlibrary.listeners = crafters;
-        }
-
         for (int i = 0; i < 9; i++)
         {
-            addSlot(new Slot(seedlibrary, i, 8 + i * 18, 108));
+            addSlotToContainer(new Slot(seedlibrary, i, 8 + i * 18, 108));
         }
 
-        addSlot(new Slot(seedlibrary, -1, 38, 16));
+        addSlotToContainer(new Slot(seedlibrary, -1, 38, 16));
 
         int i = 2*18;
 
@@ -33,13 +27,13 @@ public class SeedLibraryContainer extends Container
         {
             for (int j1 = 0; j1 < 9; j1++)
             {
-                addSlot(new Slot(iinventory, j1 + k * 9 + 9, 8 + j1 * 18, 104 + k * 18 + i));
+                addSlotToContainer(new Slot(iinventory, j1 + k * 9 + 9, 8 + j1 * 18, 104 + k * 18 + i));
             }
         }
 
         for (int l = 0; l < 9; l++)
         {
-            addSlot(new Slot(iinventory, l, 8 + l * 18, 162 + i));
+            addSlotToContainer(new Slot(iinventory, l, 8 + l * 18, 162 + i));
         }
     }
 
@@ -95,17 +89,5 @@ public class SeedLibraryContainer extends Container
             }
         }
         return itemstack;
-    }
-
-    public void onCraftGuiOpened(ICrafting crafter) {
-        super.onCraftGuiOpened(crafter);
-
-        seedlibrary.updateSeedCount();
-        seedlibrary.updateGUIFilter();
-    }
-
-    public void onCraftGuiClosed(EntityPlayer player) {
-        super.onCraftGuiClosed(player);
-        crafters.remove(player);
     }
 }

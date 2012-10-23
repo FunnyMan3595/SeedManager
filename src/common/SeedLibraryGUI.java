@@ -4,7 +4,7 @@ import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.InventoryPlayer;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.ModLoader;
-import net.minecraft.src.ic2.platform.GuiIconButton;
+import ic2.common.GuiIconButton;
 import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +106,7 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected void actionPerformed(GuiButton guibutton)
     {
-        seedlibrary.handleGuiButton(guibutton.id, rightClick);
+        seedlibrary.sendGuiButton(guibutton.id, rightClick);
         super.actionPerformed(guibutton);
     }
 
@@ -145,7 +145,12 @@ public class SeedLibraryGUI extends GuiContainer
         drawCenteredString("Total", center + main_width / 4, 
                            top + 2 + (9 + 11)*3, 0x404040);
 
-        String count = seedlibrary.seeds_available + "";
+        String count;
+        if (seedlibrary.seeds_available >= 65535) {
+            count = "MANY";
+        } else {
+            count = seedlibrary.seeds_available + "";
+        }
         drawCenteredString(count, 108, 88, 0x404040);
         drawCenteredString("Seeds", 108, 97, 0x404040);
 
@@ -492,7 +497,7 @@ public class SeedLibraryGUI extends GuiContainer
 
 
     public void setSliderValue(int slider, int value) {
-        seedlibrary.handleGuiSlider(slider, value);
+        seedlibrary.sendGuiSlider(slider, value);
     }
 
 

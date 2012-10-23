@@ -1,22 +1,24 @@
-import java.util.Random;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.BlockContainer;
+import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.common.Side;
+import ic2.api.Items;
 import java.util.ArrayList;
-import net.minecraft.src.forge.MinecraftForge;
-import net.minecraft.src.NetworkManager;
-import net.minecraft.src.IInventory;
-import net.minecraft.src.IBlockAccess;
+import java.util.Random;
+import net.minecraft.src.BlockContainer;
 import net.minecraft.src.EntityItem;
+import net.minecraft.src.EntityPlayer;
+import net.minecraft.src.IBlockAccess;
+import net.minecraft.src.IInventory;
 import net.minecraft.src.ItemStack;
-import net.minecraft.src.TileEntity;
 import net.minecraft.src.Material;
-import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.ModLoader;
+import net.minecraft.src.NBTTagCompound;
+import net.minecraft.src.NetworkManager;
+import net.minecraft.src.Packet;
+import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
-import net.minecraft.src.forge.ITextureProvider;
-import net.minecraft.src.ic2.api.Items;
 
-public class SeedManagerBlock extends BlockContainer implements ITextureProvider {
+public class SeedManagerBlock extends BlockContainer {
     // Which side should get the front texture if we don't know?
     public static final int DEFAULT_FRONT_SIDE = 3;
 
@@ -39,38 +41,39 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
         setBlockName("seedManager");
     }
 
-    public boolean blockActivated(World world, int i, int j, int k, EntityPlayer entityplayer)
+    public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer player, int side, float hit_x, float hit_y, float hit_z)
     {
-        if (entityplayer.isSneaking())
+        if (player.isSneaking())
         {
             return false;
         }
 
         TileEntity te = world.getBlockTileEntity(i, j, k);
-        if (world.isRemote) {
-            if (te instanceof SeedLibraryTileEntity) {
-                mod_SeedManager.instance.setRemoteLibrary((SeedLibraryTileEntity) te);
-            }
-            return true;
+        if (SeedManager.getSide() == Side.CLIENT) {
+            return true; // Client bails out here.
         }
 
-        if (te instanceof SeedLibraryTileEntity && !MinecraftForge.isClient()) {
+        if (te instanceof SeedLibraryTileEntity) {
             SeedLibraryTileEntity library = (SeedLibraryTileEntity) te;
-            mod_SeedManager mod = mod_SeedManager.instance;
-            NetworkManager net = mod.getNetManager(entityplayer);
-            byte[] data = new byte[1];
-            data[0] = (byte) (library.energy > 0 ? 1 : 0);
-            MinecraftForge.sendPacket(net, mod, (short)0, data);
+            byte[] data = new byte[4];
+            data[0] = (byte) library.xCoord;
+            data[1] = (byte) library.yCoord;
+            data[2] = (byte) library.zCoord;
+            data[3] = (byte) (library.energy > 0 ? 1 : 0);
+
+            Packet packet = PacketDispatcher.getTinyPacket(SeedManager.instance(), (short)0, data);
+            PacketDispatcher.sendPacketToPlayer(packet, (Player)player);
         }
-        entityplayer.openGui(mod_SeedManager.instance, 0, world, i, j, k);
+
+        player.openGui(SeedManager.instance(), 0, world, i, j, k);
         return true;
     }
 
-    public TileEntity getBlockEntity() {
+    public TileEntity createNewTileEntity(World world) {
         return null;
     }
 
-    public TileEntity getBlockEntity(int data) {
+    public TileEntity createNewTileEntity(World world, int data) {
         if (data == DATA_ANALYZER_OFF || data == DATA_ANALYZER_ON) {
             return new SeedAnalyzerTileEntity();
         } else if (data == DATA_LIBRARY_OFF || data == DATA_LIBRARY_ON) {
@@ -176,9 +179,9 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
         return Items.getItem("machine").itemID;
     }
 
-    public void onBlockRemoval(World world, int i, int j, int k)
+    public void breakBlock(World world, int x, int y, int z, int id, int data)
     {
-        IInventory inventory = (IInventory)world.getBlockTileEntity(i, j, k);
+        IInventory inventory = (IInventory)world.getBlockTileEntity(x, y, z);
         if (inventory != null)
         {
             for (int l = 0; l < inventory.getSizeInventory(); l++)
@@ -199,7 +202,7 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
                         i1 = itemstack.stackSize;
                     }
                     itemstack.stackSize -= i1;
-                    EntityItem entityitem = new EntityItem(world, (float)i + f, (float)j + f1, (float)k + f2, new ItemStack(itemstack.itemID, i1, itemstack.getItemDamage()));
+                    EntityItem entityitem = new EntityItem(world, (float)x + f, (float)y + f1, (float)z + f2, new ItemStack(itemstack.itemID, i1, itemstack.getItemDamage()));
                     float f3 = 0.05F;
                     entityitem.motionX = (float)random.nextGaussian() * f3;
                     entityitem.motionY = (float)random.nextGaussian() * f3 + 0.2F;
@@ -212,7 +215,7 @@ public class SeedManagerBlock extends BlockContainer implements ITextureProvider
                 }
             }
         }
-        super.onBlockRemoval(world, i, j, k);
+        super.breakBlock(world, x, y, z, id, data);
     }
 
     protected int damageDropped(int data) {
