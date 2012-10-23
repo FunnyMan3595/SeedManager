@@ -90,4 +90,11 @@ public class SeedLibraryContainer extends Container
         }
         return itemstack;
     }
+
+    public void addCraftingToCrafters(ICrafting crafter) {
+        super.addCraftingToCrafters(crafter);
+
+        seedlibrary.updateGUIFilter();
+        seedlibrary.updateSeedCount();
+    }
 }

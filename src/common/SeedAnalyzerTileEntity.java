@@ -5,7 +5,7 @@ import ic2.common.TileEntityElectricMachine;
 import ic2.common.ItemCropSeed;
 import ic2.api.Items;
 
-public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
+public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements IHasFront {
     public static final int[] cost_to_upgrade = {10, 90, 900, 9000};
     public static final int cost_reduction = 2;
     public int front = 3;
@@ -13,10 +13,14 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
     // This keeps track of the analyzer's internal state.  When it changes, a
     // metadata change is forced (even if not needed) so that the graphics
     // update.
-    public int state = 0;
+    public int state = -1;
     public SeedAnalyzerTileEntity()
     {
         super(3, 5, 2000/cost_reduction, 32);
+    }
+
+    public int getFront() {
+        return front;
     }
 
     public static boolean isSeed(ItemStack stack) {
@@ -138,15 +142,21 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
     public void updateEntity() {
         super.updateEntity();
 
+        updateState();
+    }
+
+    public void updateState() {
         int new_state = 0;
         if (energy > 0) {
-            new_state += 1;
+            new_state += SeedManagerBlock.BIT_HAS_POWER;
         } 
         if (isSeed(inventory[0])) {
-            new_state += 2;
+            new_state += SeedManagerBlock.BIT_HAS_SEED;
         }
+
         if (canOperate()) {
-            new_state += 4;
+            // Will always have energy and a seed.
+            new_state += SeedManagerBlock.BIT_WORKING;
         }
 
         if (new_state != state) {
@@ -156,12 +166,10 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
     }
 
     public void setMetadata() {
-        int correctData;
-        if (energy > 0) {
-            correctData = SeedManagerBlock.DATA_ANALYZER_ON;
-        } else {
-            correctData = SeedManagerBlock.DATA_ANALYZER_OFF;
-        }
+        setMetadata(SeedManagerBlock.DATA_ANALYZER + state);
+    }
+
+    public void setMetadata(int correctData) {
 
         worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, correctData);
         worldObj.markBlocksDirty(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
@@ -173,5 +181,16 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine {
 
     public String getGuiClassName(EntityPlayer player) {
         return "SeedAnalyzerGUI";
+    }
+
+    public boolean wrenchCanRemove(EntityPlayer entityPlayer) {
+        // Always drop the canonical item.
+        setMetadata(SeedManagerBlock.DATA_ANALYZER_BLOCKED);
+
+        return true;
+    }
+
+    public float getWrenchDropRate() {
+        return 1.0f;
     }
 }

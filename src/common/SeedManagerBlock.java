@@ -25,11 +25,28 @@ public class SeedManagerBlock extends BlockContainer {
     // An uninteresting side (i.e. not front, top, or bottom).
     public static final int DEFAULT_NON_FRONT_SIDE = 2;
 
-    public static final byte DATA_ANALYZER_OFF = 0;
-    public static final byte DATA_LIBRARY_OFF = 1;
+    public static final byte DATA_LIBRARY_OFF = 0;
+    public static final byte DATA_LIBRARY_ON = 1;
 
-    public static final byte DATA_ANALYZER_ON = 9;
-    public static final byte DATA_LIBRARY_ON = 10;
+    // Base data value for a Seed Analyzer
+    public static final byte DATA_ANALYZER = 8;
+
+    // Information bits for a Seed Analyzer
+    public static final byte BIT_HAS_POWER = 1;
+    public static final byte BIT_HAS_SEED = 2;
+    public static final byte BIT_WORKING = 4;
+
+    public static final byte DATA_ANALYZER_OFF =
+        DATA_ANALYZER;
+    public static final byte DATA_ANALYZER_POWERED =
+        DATA_ANALYZER + BIT_HAS_POWER;
+    public static final byte DATA_ANALYZER_SEED =
+        DATA_ANALYZER                 + BIT_HAS_SEED;
+    public static final byte DATA_ANALYZER_BLOCKED =
+        DATA_ANALYZER + BIT_HAS_POWER + BIT_HAS_SEED;
+    public static final byte DATA_ANALYZER_WORKING =
+        DATA_ANALYZER + BIT_HAS_POWER + BIT_HAS_SEED + BIT_WORKING;
+
 
     public Random random = new Random();
 
@@ -40,12 +57,13 @@ public class SeedManagerBlock extends BlockContainer {
         setStepSound(soundMetalFootstep);
         setBlockName("seedManager");
         setCreativeTab(CreativeTabs.tabDecorations);
+        setRequiresSelfNotify();
     }
 
     @SuppressWarnings("unchecked")
     public void getSubBlocks(int id, CreativeTabs type, List tabContents) {
-        tabContents.add(new ItemStack(id, 1, DATA_ANALYZER_OFF));
-        tabContents.add(new ItemStack(id, 1, DATA_LIBRARY_OFF));
+        tabContents.add(new ItemStack(id, 1, DATA_ANALYZER_BLOCKED));
+        tabContents.add(new ItemStack(id, 1, DATA_LIBRARY_ON));
     }
 
     public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer player, int side, float hit_x, float hit_y, float hit_z)
@@ -60,18 +78,6 @@ public class SeedManagerBlock extends BlockContainer {
             return true; // Client bails out here.
         }
 
-        if (te instanceof SeedLibraryTileEntity) {
-            SeedLibraryTileEntity library = (SeedLibraryTileEntity) te;
-            byte[] data = new byte[4];
-            data[0] = (byte) library.xCoord;
-            data[1] = (byte) library.yCoord;
-            data[2] = (byte) library.zCoord;
-            data[3] = (byte) (library.energy > 0 ? 1 : 0);
-
-            Packet packet = PacketDispatcher.getTinyPacket(SeedManager.instance(), (short)0, data);
-            PacketDispatcher.sendPacketToPlayer(packet, (Player)player);
-        }
-
         player.openGui(SeedManager.instance(), 0, world, i, j, k);
         return true;
     }
@@ -81,7 +87,7 @@ public class SeedManagerBlock extends BlockContainer {
     }
 
     public TileEntity createNewTileEntity(World world, int data) {
-        if (data == DATA_ANALYZER_OFF || data == DATA_ANALYZER_ON) {
+        if (data >= DATA_ANALYZER) {
             return new SeedAnalyzerTileEntity();
         } else if (data == DATA_LIBRARY_OFF || data == DATA_LIBRARY_ON) {
             return new SeedLibraryTileEntity();
@@ -101,42 +107,15 @@ public class SeedManagerBlock extends BlockContainer {
      */
     public int getBlockTexture(IBlockAccess world, int x, int y, int z, int side)
     {
-        int row = 0;
-        int col = 0;
-
         TileEntity te = world.getBlockTileEntity(x,y,z);
 
-        if (te instanceof SeedAnalyzerTileEntity) {
-            SeedAnalyzerTileEntity analyzer = (SeedAnalyzerTileEntity) te;
+        if (te instanceof IHasFront) {
+            IHasFront fronted = (IHasFront) te;
 
-            if (side == 1) {
-                row = 2;
-                if (analyzer.isSeed(analyzer.inventory[0])) {
-                    col = 1;
-                }
-            } else if (side == 0) {
-                row = 3;
-            } else if (side == analyzer.front) {
-                if (analyzer.energy > 0) {
-                    if (analyzer.canOperate()) {
-                        col = 2;
-                    } else {
-                        col = 1;
-                    }
-                }
-            } else {
-                row = 1;
-            }
-
-            int tex = row*16 + col;
-            return tex;
-        } else if (te instanceof SeedLibraryTileEntity) {
-            SeedLibraryTileEntity library = (SeedLibraryTileEntity) te;
-
-            // For the library, we just fix the side index to match the default
-            // front side, then fall through to the metadata-based version.
+            // Just fix the side index to match the default front side, then
+            // fall through to the metadata-based version.
             if (side > 1) { // Not top or bottom.
-                if (side == library.front) {
+                if (side == fronted.getFront()) {
                     side = DEFAULT_FRONT_SIDE;
                 } else {
                     side = DEFAULT_NON_FRONT_SIDE;
@@ -148,33 +127,47 @@ public class SeedManagerBlock extends BlockContainer {
     }
 
     public int getBlockTextureFromSideAndMetadata(int side, int data) {
-        int x;
-        int y;
+        int x = 0;
+        int y = 0;
 
-        if (data == DATA_ANALYZER_OFF) {
-            x = 0;
-            y = 0;
-        } else if (data == DATA_ANALYZER_ON) {
-            x = 1;
-            y = 0;
-        } else if (data == DATA_LIBRARY_OFF) {
-            x = 0;
-            y = 4;
-        } else { // data == DATA_LIBRARY_ON
-            x = 1;
-            y = 4;
-        }
-
-        if (side == 0) {
-            y += 3;
-        } else if (side == 1) {
-            y += 2;
-        } else if (side == DEFAULT_FRONT_SIDE) {
-            y += 0;
+        if (data >= DATA_ANALYZER) {
+            if (side == 1) {
+                y = 2;
+                if ((data & BIT_HAS_SEED) > 0) {
+                    x = 1;
+                }
+            } else if (side == 0) {
+                y = 3;
+            } else if (side == DEFAULT_FRONT_SIDE) {
+                if ((data & BIT_HAS_POWER) > 0) {
+                    if ((data & BIT_WORKING) > 0) {
+                        x = 2;
+                    } else {
+                        x = 1;
+                    }
+                }
+            } else {
+                y = 1;
+            }
         } else {
-            y += 1;
-        }
+            if (data == DATA_LIBRARY_OFF) {
+                x = 0;
+                y = 4;
+            } else if (data == DATA_LIBRARY_ON) {
+                x = 1;
+                y = 4;
+            }
 
+            if (side == 0) {
+                y += 3;
+            } else if (side == 1) {
+                y += 2;
+            } else if (side == DEFAULT_FRONT_SIDE) {
+                y += 0;
+            } else {
+                y += 1;
+            }
+        }
         return y*16 + x;
     }
 

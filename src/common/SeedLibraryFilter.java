@@ -1,3 +1,4 @@
+import cpw.mods.fml.common.Side;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.NBTTagCompound;
 import ic2.api.CropCard;
@@ -93,7 +94,7 @@ public class SeedLibraryFilter {
         cache.clear();
         cached_nothing = false;
 
-        if (library != null) {
+        if (library != null && SeedManager.getSide() != Side.CLIENT) {
             updateSeedCount();
             library.updateGUIFilter();
         }

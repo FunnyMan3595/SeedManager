@@ -98,8 +98,8 @@ public class SeedManager {
         Ic2Items.cropSeed = new ItemStack(new ExtendedCropSeed(Ic2Items.cropSeed));
 
         // Item stacks for identifying the analyzer/library
-        ItemStack seedAnalyzer = new ItemStack(seedmanager, 1, 0);
-        ItemStack seedLibrary = new ItemStack(seedmanager, 1, 1);
+        ItemStack seedAnalyzer = new ItemStack(seedmanager, 1, SeedManagerBlock.DATA_ANALYZER_BLOCKED);
+        ItemStack seedLibrary = new ItemStack(seedmanager, 1, SeedManagerBlock.DATA_LIBRARY_ON);
 
         if (side == Side.CLIENT) {
             // Preload the in-world texture.
@@ -164,10 +164,6 @@ public class SeedManager {
 
                 EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 
-                if (!player.worldObj.isRemote) {
-                    return;
-                }
-
                 int x = MathHelper.floor_double(player.posX);
                 int y = MathHelper.floor_double(player.posY);
                 int z = MathHelper.floor_double(player.posZ);
@@ -191,14 +187,12 @@ public class SeedManager {
                     return;
                 }
 
-                if (id == 0) { // Does the SeedLibrary have power?
-                    seedLibrary.energy = data[3];
-                } else if (id == 1) { // How many seeds does the filter match?
+                if (id == 0) { // How many seeds does the filter match?
                     int seed_count = data[3] & 0xff;
                     seed_count += (data[4] & 0xff) * 256;
 
                     seedLibrary.seeds_available = seed_count;
-                } else if (id == 2) { // What's the current filter?
+                } else if (id == 1) { // What's the current filter?
                     NBTBase nbt = null;
                     try {
                         ByteArrayInputStream debyter = new ByteArrayInputStream(data);
@@ -222,6 +216,10 @@ public class SeedManager {
                     }
 
                     SeedLibraryContainer container = (SeedLibraryContainer)player.craftingInventory;
+
+                    if (container.seedlibrary.energy <= 0) {
+                        return;
+                    }
 
                     if (id == 0) { // GUI button clicked
                         int button = data[0];

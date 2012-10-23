@@ -1,9 +1,12 @@
+import net.minecraft.client.Minecraft;
 import net.minecraft.src.GuiButton;
 import net.minecraft.src.GuiContainer;
+import net.minecraft.src.GuiScreen;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.InventoryPlayer;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.ModLoader;
+import net.minecraft.src.World;
 import ic2.common.GuiIconButton;
 import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
@@ -46,7 +49,7 @@ public class SeedLibraryGUI extends GuiContainer
         }
     }
 
-    public SeedLibraryTileEntity seedlibrary;
+    public int world_x, world_y, world_z;
     public static final int BORDER = 4;
     public int main_width, main_height, left, top, center, middle, right, bottom, sliders_x, sliders_y, sliders_spacing;
     public int current_slider = -1, drag_start_x = 0, drag_start_value = 0;
@@ -55,7 +58,10 @@ public class SeedLibraryGUI extends GuiContainer
     public SeedLibraryGUI(InventoryPlayer inventoryplayer, TileEntity seedmanager)
     {
         super(new SeedLibraryContainer(inventoryplayer, (SeedLibraryTileEntity)seedmanager));
-        seedlibrary = (SeedLibraryTileEntity) seedmanager;
+
+        world_x = seedmanager.xCoord;
+        world_y = seedmanager.yCoord;
+        world_z = seedmanager.zCoord;
 
 
         ySize = 222;
@@ -73,6 +79,17 @@ public class SeedLibraryGUI extends GuiContainer
         sliders_x = center + main_width / 4 - (63/2);
         sliders_y = top + 2 + 9 - 1;
         sliders_spacing = 11 + 9;
+    }
+
+    public SeedLibraryTileEntity getLibrary() {
+        World world = Minecraft.getMinecraft().thePlayer.worldObj;
+        TileEntity te = world.getBlockTileEntity(world_x, world_y, world_z);
+
+        if (te instanceof SeedLibraryTileEntity) {
+            return (SeedLibraryTileEntity) te;
+        } else {
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -107,6 +124,11 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected void actionPerformed(GuiButton guibutton)
     {
+        SeedLibraryTileEntity seedlibrary = getLibrary();
+        if (seedlibrary == null) {
+            return;
+        }
+
         seedlibrary.sendGuiButton(guibutton.id, rightClick);
         super.actionPerformed(guibutton);
     }
@@ -129,6 +151,12 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected void drawGuiContainerForegroundLayer()
     {
+        SeedLibraryTileEntity seedlibrary = getLibrary();
+        if (seedlibrary == null) {
+            Minecraft.getMinecraft().displayGuiScreen((GuiScreen)null);
+            return;
+        }
+
         SeedLibraryFilter filter = seedlibrary.getGUIFilter();
 
         drawCenteredString("Seed Type", left + main_width / 4, top + 2,
@@ -177,7 +205,7 @@ public class SeedLibraryGUI extends GuiContainer
         } catch (IllegalArgumentException e) {
         }
 
-        if (seedlibrary.energy <= 0) {
+        if (!seedlibrary.hasEnergy()) {
             drawRect(left, top, right, bottom + 20, 0xff000000);
             drawCenteredString("Out of power.", center, middle - 3, 0x404040);
             drawCenteredString("Connect to LV power", center, middle + 6, 0x404040);
@@ -198,17 +226,15 @@ public class SeedLibraryGUI extends GuiContainer
 
         fontRenderer.drawString("Inventory", 8, (ySize - 96) + 2, 0x404040);
 
-        List<String> tooltip = getTooltip(mouseX, mouseY);
-        if (tooltip != null && tooltip.size() > 0) {
+        String tooltip = getTooltip(mouseX, mouseY);
+        if (tooltip != null && tooltip.length() > 0) {
             showTooltip(mouseX, mouseY, tooltip);
         }
 
         super.drawGuiContainerForegroundLayer();
     }
 
-    public List<String> getTooltip(int x, int y) {
-        ArrayList<String> tooltip = new ArrayList<String>();
-
+    public String getTooltip(int x, int y) {
         int slider;
         if (current_slider != -1) {
             slider = current_slider;
@@ -217,68 +243,28 @@ public class SeedLibraryGUI extends GuiContainer
         }
 
         if (slider != -1) {
-            tooltip.add(getSliderName(slider) + WHITE + ":");
             int value = getSliderValue(slider);
             if (slider > 5) {
                 value *= 3;
             }
-            tooltip.add("" + value);
+
+            return getSliderName(slider) + WHITE + ": " + value;
         }
 
-        return tooltip;
+        return null;
     }
 
-    public void showTooltip(int x, int y, List<String> contents) {
-        int width = 0;
-        for (String line : contents) {
-            width = Math.max(width, fontRenderer.getStringWidth(line));
-        }
-
-        int left = x - guiLeft + 12;
-        int top = y - guiTop - 12;
-
-        int height = contents.size() * 10 - 2;
-
-        int bkg = -267386864;
-
-        // Ensure we're on top of everything else.
-        zLevel = 300;
-
-        // Top line
-        drawGradientRect(left - 3, top - 4, left + width + 3, top - 3, bkg, bkg);
-
-        // Bottom line
-        drawGradientRect(left - 3, top + height + 3, left + width + 3, top + height + 4, bkg, bkg);
-
-        // Main background
-        drawGradientRect(left - 3, top - 3, left + width + 3, top + height + 3, bkg, bkg);
-
-        // Left line
-        drawGradientRect(left - 4, top - 3, left - 3, top + height + 3, bkg, bkg);
-
-        // Right line
-        drawGradientRect(left + width + 3, top - 3, left + width + 4, top + height + 3, bkg, bkg);
-
-        int border_1 = 1347420415;
-        int border_2 = (border_1 & 16711422) >> 1 | border_1 & -16777216;
-
-        // Borders
-        drawGradientRect(left - 3, top - 3 + 1, left - 3 + 1, top + height + 3 - 1, border_1, border_2);
-        drawGradientRect(left + width + 2, top - 3 + 1, left + width + 3, top + height + 3 - 1, border_1, border_2);
-        drawGradientRect(left - 3, top - 3, left + width + 3, top - 3 + 1, border_1, border_1);
-        drawGradientRect(left - 3, top + height + 2, left + width + 3, top + height + 3, border_2, border_2);
-
-        for (String line : contents) {
-            fontRenderer.drawStringWithShadow(line, left, top, -1);
-            top += 10;
-        }
-
-        // Return to normal GUI Z level.
-        zLevel = 0;
+    public void showTooltip(int x, int y, String contents) {
+        drawCreativeTabHoveringText(contents, x - guiLeft, y - guiTop);
     }
 
     protected void drawGuiContainerBackgroundLayer(float f, int i, int j)
     {
+        SeedLibraryTileEntity seedlibrary = getLibrary();
+        if (seedlibrary == null) {
+            return;
+        }
+
         // Bind the GUI's texture.
         int k = mc.renderEngine.getTexture("/fm_seedlibrary_gui.png");
         mc.renderEngine.bindTexture(k);
@@ -360,7 +346,12 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected void mouseClicked(int x, int y, int button) {
         super.mouseClicked(x, y, button);
-        if (seedlibrary.energy <= 0) {
+        SeedLibraryTileEntity seedlibrary = getLibrary();
+        if (seedlibrary == null) {
+            return;
+        }
+
+        if (!seedlibrary.hasEnergy()) {
             current_slider = -1;
             return;
         }
@@ -466,6 +457,11 @@ public class SeedLibraryGUI extends GuiContainer
     }
 
     public int getSliderValue(int slider) {
+        SeedLibraryTileEntity seedlibrary = getLibrary();
+        if (seedlibrary == null) {
+            return 0;
+        }
+
         SeedLibraryFilter filter = seedlibrary.getGUIFilter();
         int bar = slider / 2;
         int arrow = slider % 2;
@@ -498,12 +494,22 @@ public class SeedLibraryGUI extends GuiContainer
 
 
     public void setSliderValue(int slider, int value) {
+        SeedLibraryTileEntity seedlibrary = getLibrary();
+        if (seedlibrary == null) {
+            return;
+        }
+
         seedlibrary.sendGuiSlider(slider, value);
     }
 
 
     protected void mouseMovedOrUp(int x, int y, int button) {
         super.mouseMovedOrUp(x, y, button);
+
+        SeedLibraryTileEntity seedlibrary = getLibrary();
+        if (seedlibrary == null) {
+            return;
+        }
 
         mouseX = x;
         mouseY = y;
@@ -514,7 +520,7 @@ public class SeedLibraryGUI extends GuiContainer
             rightSelect = null;
         }
 
-        if (seedlibrary.energy <= 0) {
+        if (!seedlibrary.hasEnergy()) {
             current_slider = -1;
             return;
         }

@@ -26,7 +26,7 @@ import net.minecraft.src.NetworkManager;
 import net.minecraft.src.Packet;
 import net.minecraft.src.TileEntity;
 
-public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWrenchable, ISpecialInventory {
+public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWrenchable, ISpecialInventory, IHasFront {
     public static final boolean DEBUG_SEEDS = false;
     protected SeedLibraryFilter[] filters = new SeedLibraryFilter[7];
     protected HashMap<String, ItemStack> deepContents = new HashMap<String, ItemStack>();
@@ -47,6 +47,10 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         // The GUI filter gets a reference to the library, so that it can
         // announce when its count changes.
         filters[filters.length - 1] = new SeedLibraryFilter(this);
+    }
+
+    public int getFront() {
+        return front;
     }
 
     public void sendPacketToNearby(int id, byte[] data) {
@@ -89,6 +93,11 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     public void setSeedCount(int new_count) {
         seeds_available = new_count;
 
+        // We only need to do the rest on the server side.
+        if(SeedManager.getSide() == Side.CLIENT) {
+            return;
+        }
+
         // Notify all nearby players that the seed count has changed.
         byte[] data = new byte[5];
 
@@ -99,14 +108,16 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         data[3] = (byte) (new_count % 256);
         data[4] = (byte) (new_count / 256);
 
-        sendPacketToNearby(1, data);
+        sendPacketToNearby(0, data);
     }
 
     public void updateGUIFilter() {
-        // Makes no sense to do this on the client side.
+        // We only need to do this on the server side.
         if(SeedManager.getSide() == Side.CLIENT) {
             return;
         }
+
+        onInventoryChanged();
 
         // Notify all nearby players that the GUI filter has changed.
         NBTTagCompound nbt = new NBTTagCompound();
@@ -133,35 +144,37 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             return;
         }
 
-        sendPacketToNearby(2, data);
+        sendPacketToNearby(1, data);
     }
 
-    public void updateEntity()
-    {
+    public void updateEntity() {
         super.updateEntity();
-        if (IC2.platform.isSimulating())
-        {
-            checkMetadata();
-            if (energy > 0) {
-                energy--;
-            }
-            if (energy < maxEnergy) {
-                provideEnergy();
-            }
+        checkMetadata();
+        if (energy > 0) {
+            energy--;
         }
+        if (energy < maxEnergy) {
+            provideEnergy();
+        }
+    }
+
+    public boolean hasEnergy() {
+        return (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) 
+                == SeedManagerBlock.DATA_LIBRARY_ON);
     }
 
     public void checkMetadata() {
-        int correctData;
         if (energy > 0) {
-            correctData = SeedManagerBlock.DATA_LIBRARY_ON;
+            checkMetadata(SeedManagerBlock.DATA_LIBRARY_ON);
         } else {
-            correctData = SeedManagerBlock.DATA_LIBRARY_OFF;
+            checkMetadata(SeedManagerBlock.DATA_LIBRARY_OFF);
         }
+    }
 
+    public void checkMetadata(int correctData) {
         if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) != correctData) {
             worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, correctData);
-            worldObj.markBlocksDirty(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
+            worldObj.markBlockAsNeedsUpdate(xCoord, yCoord, zCoord);
         }
     }
 
@@ -234,6 +247,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             int dir = button - 4;
             if (rightClick) {
                 filters[dir].copyFrom(filters[6]);
+                onInventoryChanged();
             } else {
                 filters[6].copyFrom(filters[dir]);
             }
@@ -321,6 +335,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
                 filter.newSeed(stored);
             }
         }
+        onInventoryChanged();
     }
 
     public void removeSeeds(ItemStack seeds) {
@@ -349,6 +364,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
                 // All we need to do is update the GUI count.
                 updateCountIfMatch(stored);
             }
+            onInventoryChanged();
         }
     }
 
@@ -428,7 +444,13 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     public void setFacing(short facing) { }
 
     public boolean wrenchCanRemove(EntityPlayer entityPlayer) {
-        return deepContents.isEmpty();
+        if (deepContents.isEmpty()) {
+            // Always drop the canonical item.
+            checkMetadata(SeedManagerBlock.DATA_LIBRARY_ON);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public float getWrenchDropRate() {
