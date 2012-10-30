@@ -59,6 +59,16 @@ public class SeedManager {
     @SidedProxy(clientSide = "ClientProxy", serverSide = "CommonProxy")
     public static CommonProxy proxy;
 
+    public static int real_mod(int number, int modulus) {
+        int mod = number % modulus;
+        if (mod < 0) {
+            // Java is a fucking idiot.
+            mod += modulus;
+        }
+
+        return mod;
+    }
+
     @Mod.PreInit
     public void preInit(FMLPreInitializationEvent event) {
         instance = this;
@@ -161,11 +171,17 @@ public class SeedManager {
                 int y_end = data[1] & 0xff;
                 int z_end = data[2] & 0xff;
 
+                if (DEBUG) {
+                    System.out.println(String.format("X: %x - %x + %x = %x", x, (x % 256), data[0] & 0xff, x + x_end - real_mod(x, 256)));
+                    System.out.println(String.format("Y: %x - %x + %x = %x", y, (y % 256), data[1] & 0xff, y + y_end - real_mod(y, 256)));
+                    System.out.println(String.format("Z: %x - %x + %x = %x", z, (z % 256), data[2] & 0xff, z + z_end - real_mod(z, 256)));
+                }
+
                 // Clobber the last few bits of x,y,z with the values we got
                 // in from the packet.
-                x += x_end - (x % 256);
-                y += y_end - (y % 256);
-                z += z_end - (z % 256);
+                x += x_end - real_mod(x, 256);
+                y += y_end - real_mod(y, 256);
+                z += z_end - real_mod(z, 256);
 
                 TileEntity te = player.worldObj.getBlockTileEntity(x,y,z);
 
@@ -173,6 +189,7 @@ public class SeedManager {
                 if (te instanceof SeedLibraryTileEntity) {
                     seedLibrary = (SeedLibraryTileEntity) te;
                 } else {
+                    System.out.println("Seed Library packet recieved, but missing or incompatible tile entity found: " + seedLibrary);
                     return;
                 }
 

@@ -56,9 +56,9 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     public void sendPacketToNearby(int id, byte[] data) {
         // Yes, this is unfriendly.
         // But everyone would have to do it themselves otherwise.
-        data[0] = (byte)xCoord;
-        data[1] = (byte)yCoord;
-        data[2] = (byte)zCoord;
+        data[0] = (byte) (xCoord & 0xff);
+        data[1] = (byte) (yCoord & 0xff);
+        data[2] = (byte) (zCoord & 0xff);
 
         if (worldObj == null) {
             return; // Inventory has no world.
