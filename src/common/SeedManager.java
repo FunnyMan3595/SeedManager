@@ -1,7 +1,7 @@
-import cpw.mods.fml.client.TextureFXManager;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Side;
+import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.IConnectionHandler;
@@ -10,7 +10,6 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
 import ic2.api.Ic2Recipes;
 import ic2.api.Items;
 import ic2.common.ContainerElectricMachine;
@@ -21,8 +20,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
-import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.src.Block;
@@ -58,6 +55,9 @@ public class SeedManager {
     public static final boolean DEBUG = false;
     public static Configuration config;
     public static SeedManager instance = null;
+
+    @SidedProxy(clientSide = "ClientProxy", serverSide = "CommonProxy")
+    public static CommonProxy proxy;
 
     @Mod.PreInit
     public void preInit(FMLPreInitializationEvent event) {
@@ -101,18 +101,7 @@ public class SeedManager {
         ItemStack seedAnalyzer = new ItemStack(seedmanager, 1, SeedManagerBlock.DATA_ANALYZER_BLOCKED);
         ItemStack seedLibrary = new ItemStack(seedmanager, 1, SeedManagerBlock.DATA_LIBRARY_ON);
 
-        if (side == Side.CLIENT) {
-            // Preload the in-world texture.
-            MinecraftForgeClient.preloadTexture("/fm_seedmanager.png");
-
-            // Set up the seed analyzer animation.
-            TextureFXManager.instance().addAnimation(new SeedAnalyzerFX());
-
-            // Add naming.
-            LanguageRegistry.addName(seedmanager, "Seed Manager");
-            LanguageRegistry.addName(seedAnalyzer, "Seed Analyzer");
-            LanguageRegistry.addName(seedLibrary, "Seed Library");
-        }
+        proxy.init(seedmanager, seedAnalyzer, seedLibrary);
 
         // Add crafting recipes
         Ic2Recipes.addCraftingRecipe(seedAnalyzer, new Object[] {
@@ -162,7 +151,7 @@ public class SeedManager {
                 // XXX: Current packets assume a relevant seed library.
                 //      This will need fixing if a new packet type is added.
 
-                EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+                EntityPlayer player = proxy.getLocalPlayer();
 
                 int x = MathHelper.floor_double(player.posX);
                 int y = MathHelper.floor_double(player.posY);
