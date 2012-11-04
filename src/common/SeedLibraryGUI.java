@@ -114,7 +114,7 @@ public class SeedLibraryGUI extends GuiContainer
             // South = +Z = 3
             // West = -X = 4
             // East = +X = 5
-            String key = "BTNSEW";
+            String key = "BTNSWE";
             String name = "" + key.charAt(dir);
             controlList.add(new GuiButton(dir + 4, x + dir*13, y, 12, 20, name));
         }
