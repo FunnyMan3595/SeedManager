@@ -10,8 +10,8 @@ import java.util.Vector;
 public class SeedLibraryFilter {
     public SeedLibraryTileEntity library = null;
     public boolean bulk_mode = false;
-    public boolean allow_unknown_type = true;
-    public boolean allow_unknown_ggr = true;
+    public int unknown_type = 1;
+    public int unknown_ggr = 1;
     public int seed_type = -1;
     public int min_growth = 0;
     public int min_gain = 0;
@@ -32,8 +32,8 @@ public class SeedLibraryFilter {
     }
 
     public void copyFrom(SeedLibraryFilter source) {
-        allow_unknown_type = source.allow_unknown_type;
-        allow_unknown_ggr = source.allow_unknown_ggr;
+        unknown_type = source.unknown_type;
+        unknown_ggr = source.unknown_ggr;
         seed_type = source.seed_type;
         min_growth = source.min_growth;
         min_gain = source.min_gain;
@@ -105,7 +105,9 @@ public class SeedLibraryFilter {
         byte scan = ItemCropSeed.getScannedFromStack(seed);
 
         if (scan == 0) {
-            return allow_unknown_type && allow_unknown_ggr;
+            return (unknown_type > 0) && (unknown_ggr > 0);
+        } else if (unknown_type == 2) {
+            return false;
         }
 
         if (seed_type != -1 && seed_type != id) {
@@ -113,7 +115,9 @@ public class SeedLibraryFilter {
         }
 
         if (scan < 4) {
-            return allow_unknown_ggr;
+            return (unknown_ggr > 0);
+        } else if (unknown_ggr == 2) {
+            return false;
         }
 
         byte growth = ItemCropSeed.getGrowthFromStack(seed);
@@ -214,8 +218,14 @@ public class SeedLibraryFilter {
 
     // Save/load
     public void loadFromNBT(NBTTagCompound input) {
-        allow_unknown_type = input.getBoolean("allow_unknown_type");
-        allow_unknown_ggr = input.getBoolean("allow_unknown_ggr");
+        if (input.hasKey("allow_unknown_type")) {
+            // Upgrade path for pre-3.0.
+            unknown_type = input.getByte("allow_unknown_type");
+            unknown_ggr = input.getByte("allow_unknown_ggr");
+        } else {
+            unknown_type = input.getByte("unknown_type");
+            unknown_ggr = input.getByte("unknown_ggr");
+        }
         seed_type = input.getInteger("seed_type");
         min_growth = input.getInteger("min_growth");
         min_gain = input.getInteger("min_gain");
@@ -234,8 +244,8 @@ public class SeedLibraryFilter {
     }
 
     public void writeToNBT(NBTTagCompound output) {
-        output.setBoolean("allow_unknown_type", allow_unknown_type);
-        output.setBoolean("allow_unknown_ggr", allow_unknown_ggr);
+        output.setByte("unknown_type", (byte)unknown_type);
+        output.setByte("unknown_ggr", (byte)unknown_ggr);
         output.setInteger("seed_type", seed_type);
         output.setInteger("min_growth", min_growth);
         output.setInteger("min_gain", min_gain);

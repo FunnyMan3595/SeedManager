@@ -4,10 +4,10 @@ import net.minecraft.src.GuiContainer;
 import net.minecraft.src.GuiScreen;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.InventoryPlayer;
+import net.minecraft.src.MathHelper;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.ModLoader;
 import net.minecraft.src.World;
-import ic2.common.GuiIconButton;
 import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,23 +37,16 @@ public class SeedLibraryGUI extends GuiContainer
 
     protected List realControls = null;
     protected List noControls = new ArrayList();
-    private static java.lang.reflect.Field textureY = null;
     private boolean rightClick = false;
     private GuiButton rightSelect;
-    static {
-        try {
-            textureY = GuiIconButton.class.getDeclaredField("textureY");
-            textureY.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public int world_x, world_y, world_z;
     public static final int BORDER = 4;
     public int main_width, main_height, left, top, center, middle, right, bottom, sliders_x, sliders_y, sliders_spacing;
     public int current_slider = -1, drag_start_x = 0, drag_start_value = 0;
-    public GuiIconButton unk_type_button, unk_ggr_button;
+    public TooltipIconButton unk_type_button, unk_ggr_button;
+
+    public TooltipButton[] directionButtons = new TooltipButton[6];
 
     public SeedLibraryGUI(InventoryPlayer inventoryplayer, TileEntity seedmanager)
     {
@@ -95,15 +88,23 @@ public class SeedLibraryGUI extends GuiContainer
     @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
-        GuiIconButton importButton = new GuiIconButton(0, guiLeft + 132, guiTop + 86, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 0+1);
+        TooltipIconButton importButton = new TooltipIconButton(0, guiLeft + 132, guiTop + 86, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 0+1);
+        importButton.tooltip = "Import seeds";
         controlList.add(importButton);
-        GuiIconButton exportButton = new GuiIconButton(1, guiLeft + 151, guiTop + 86, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 18+1);
+
+        TooltipIconButton exportButton = new TooltipIconButton(1, guiLeft + 151, guiTop + 86, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 18+1);
+        exportButton.tooltip = "Export seeds";
         controlList.add(exportButton);
 
-        unk_type_button = new GuiIconButton(2, guiLeft + left + main_width/8 - 9, guiTop + middle + 20, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 72+1);
+
+        unk_type_button = new TooltipIconButton(2, guiLeft + left + main_width/8 - 9, guiTop + middle + 20, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 90+1);
+        unk_type_button.tooltip = "Seeds with unknown type included";
         controlList.add(unk_type_button);
-        unk_ggr_button = new GuiIconButton(3, guiLeft + left + (main_width*3)/8 - 9, guiTop + middle + 20, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 72+1);
+
+        unk_ggr_button = new TooltipIconButton(3, guiLeft + left + (main_width*3)/8 - 9, guiTop + middle + 20, 18, 20, "/fm_seedlibrary_gui.png", 176+2, 90+1);
+        unk_ggr_button.tooltip = "Seeds with unknown GGR included";
         controlList.add(unk_ggr_button);
+
 
         int x = guiLeft + left + 3;
         int y = guiTop + 86;
@@ -116,7 +117,30 @@ public class SeedLibraryGUI extends GuiContainer
             // East = +X = 5
             String key = "BTNSWE";
             String name = "" + key.charAt(dir);
-            controlList.add(new GuiButton(dir + 4, x + dir*13, y, 12, 20, name));
+
+            TooltipButton button = new TooltipButton(dir + 4, x + dir*13, y, 12, 20, name);
+            controlList.add(button);
+            directionButtons[dir] = button;
+        }
+
+        String[] labels = new String[] {"Growth", "Gain", "Resistance", "Total"};
+        String[] tooltips = new String[] {"Faster growth speed",
+                                          "More resources on harvest",
+                                          "Better weed resistance",
+                                          "Worse environmental tolerance"};
+        int label_left = guiLeft + center + 10;
+        int label_width = (main_width / 2) - 20;
+        int label_top = guiTop + top + 2;
+        int label_height = 9;
+
+        for (int i=0; i<4; i++) {
+            TooltipLabel label = new TooltipLabel(-1, label_left, label_top,
+                                                     label_width, label_height,
+                                                  labels[i]);
+            label.tooltip = tooltips[i];
+            controlList.add(label);
+
+            label_top += 9 + 11;
         }
 
         realControls = controlList;
@@ -165,14 +189,6 @@ public class SeedLibraryGUI extends GuiContainer
                            left + main_width / 4, top + 2 + 8 + 1 + 18 + 2,
                            0x404040);
 
-        drawCenteredString("Growth", center + main_width / 4, top + 2,
-                           0x404040);
-        drawCenteredString("Gain", center + main_width / 4, top + 2 + 9 + 11,
-                           0x404040);
-        drawCenteredString("Resistance", center + main_width / 4, 
-                           top + 2 + (9 + 11)*2, 0x404040);
-        drawCenteredString("Total", center + main_width / 4, 
-                           top + 2 + (9 + 11)*3, 0x404040);
 
         String count;
         if (seedlibrary.seeds_available >= 65535) {
@@ -183,26 +199,33 @@ public class SeedLibraryGUI extends GuiContainer
         drawCenteredString(count, 108, 88, 0x404040);
         drawCenteredString("Seeds", 108, 97, 0x404040);
 
-        drawCenteredString("Allow unknown", left + main_width / 4, middle + 2,
+        drawCenteredString("Missing info", left + main_width / 4, middle + 2,
                            0x404040);
         drawCenteredString("Type", left + main_width/8, middle + 11,
                            0x404040);
         drawCenteredString("GGR", left + (main_width*3)/8, middle + 11,
                            0x404040);
 
-        try {
-            int type_y = 54 + 1;
-            if (filter.allow_unknown_type) {
-                type_y = 72 + 1;
-            }
-            textureY.set(unk_type_button, type_y);
-            int ggr_y = 54 + 1;
-            if (filter.allow_unknown_ggr) {
-                ggr_y = 72 + 1;
-            }
-            textureY.set(unk_ggr_button, ggr_y);
-        } catch (IllegalAccessException e) {
-        } catch (IllegalArgumentException e) {
+        if (filter.unknown_type == 0) {
+            unk_type_button.setTextureY(72 + 1);
+            unk_type_button.tooltip = "Seeds with unknown type " + RED + "excluded";
+        } else if (filter.unknown_type == 1) {
+            unk_type_button.setTextureY(90 + 1);
+            unk_type_button.tooltip = "Seeds with unknown type included";
+        } else {
+            unk_type_button.setTextureY(108 + 1);
+            unk_type_button.tooltip = "Seeds with unknown type " + GREEN + "only";
+        }
+
+        if (filter.unknown_ggr == 0) {
+            unk_ggr_button.setTextureY(72 + 1);
+            unk_ggr_button.tooltip = "Seeds with unknown GGR " + RED + "excluded";
+        } else if (filter.unknown_ggr == 1) {
+            unk_ggr_button.setTextureY(90 + 1);
+            unk_ggr_button.tooltip = "Seeds with unknown GGR included";
+        } else {
+            unk_ggr_button.setTextureY(108 + 1);
+            unk_ggr_button.tooltip = "Seeds with unknown GGR " + GREEN + "only";
         }
 
         if (!seedlibrary.hasEnergy()) {
@@ -249,6 +272,106 @@ public class SeedLibraryGUI extends GuiContainer
             }
 
             return getSliderName(slider) + WHITE + ": " + value;
+        }
+
+        SeedLibraryTileEntity seedlibrary = getLibrary();
+        if (seedlibrary == null) {
+            return null;
+        }
+
+        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        int f = MathHelper.floor_double((double)(player.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+
+        for (int dir=0; dir<6; dir++) {
+            TooltipButton button = directionButtons[dir];
+            if (button.getActiveTooltip(x, y) == null) {
+                continue;
+            }
+            String base_dir = null;
+            String left   = "To your left";
+            String right  = "To your right";
+            String ahead  = "Ahead of you";
+            String behind = "Behind you";
+            if (dir == 0) {
+                // Down = -Y = 0
+                return "Down: Below you";
+            } else if (dir == 1) {
+                // Up = +Y = 1
+                return "Up: Above you";
+            } else if (dir == 2) {
+                // North = -Z = 2
+                base_dir = "North: ";
+                if (f == 2) {
+                    // f: 2 = North
+                    return base_dir + ahead;
+                } else if (f == 3) {
+                    // f: 3 = East
+                    return base_dir + left;
+                } else if (f == 0) {
+                    // f: 0 = South
+                    return base_dir + behind;
+                } else if (f == 1) {
+                    // f: 1 = West
+                    return base_dir + right;
+                }
+            } else if (dir == 5) {
+                // East = +X = 5
+                base_dir = "East: ";
+                if (f == 2) {
+                    // f: 2 = North
+                    return base_dir + right;
+                } else if (f == 3) {
+                    // f: 3 = East
+                    return base_dir + ahead;
+                } else if (f == 0) {
+                    // f: 0 = South
+                    return base_dir + left;
+                } else if (f == 1) {
+                    // f: 1 = West
+                    return base_dir + behind;
+                }
+            } else if (dir == 3) {
+                // South = +Z = 3
+                base_dir = "South: ";
+                if (f == 2) {
+                    // f: 2 = North
+                    return base_dir + behind;
+                } else if (f == 3) {
+                    // f: 3 = East
+                    return base_dir + right;
+                } else if (f == 0) {
+                    // f: 0 = South
+                    return base_dir + ahead;
+                } else if (f == 1) {
+                    // f: 1 = West
+                    return base_dir + left;
+                }
+            } else if (dir == 4) {
+                // West = -X = 4
+                base_dir = "West: ";
+                if (f == 2) {
+                    // f: 2 = North
+                    return base_dir + left;
+                } else if (f == 3) {
+                    // f: 3 = East
+                    return base_dir + behind;
+                } else if (f == 0) {
+                    // f: 0 = South
+                    return base_dir + right;
+                } else if (f == 1) {
+                    // f: 1 = West
+                    return base_dir + ahead;
+                }
+            }
+        }
+
+        for (Object control : controlList) {
+            if (control instanceof IHasTooltip) {
+                String tooltip = ((IHasTooltip)control).getActiveTooltip(x, y);
+                if (tooltip != null) {
+                    return tooltip;
+                }
+            }
         }
 
         return null;

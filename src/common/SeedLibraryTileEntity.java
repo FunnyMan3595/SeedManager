@@ -237,11 +237,11 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
             exportToInventory();
         } else if (button == 2) {
             SeedLibraryFilter filter = getGUIFilter();
-            filter.allow_unknown_type = !filter.allow_unknown_type;
+            filter.unknown_type = (filter.unknown_type + 1) % 3;
             filter.settingsChanged();
         } else if (button == 3) {
             SeedLibraryFilter filter = getGUIFilter();
-            filter.allow_unknown_ggr = !filter.allow_unknown_ggr;
+            filter.unknown_ggr = (filter.unknown_ggr + 1) % 3;
             filter.settingsChanged();
         } else if (button < 10) {
             int dir = button - 4;
