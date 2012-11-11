@@ -62,7 +62,7 @@ public class SeedLibraryContainer extends Container
             itemstack = itemstack1.copy();
             if (i < 9)
             {
-                if (!mergeItemStack(itemstack1, 9, 45, true))
+                if (!mergeItemStack(itemstack1, 10, 46, true))
                 {
                     return null;
                 }
