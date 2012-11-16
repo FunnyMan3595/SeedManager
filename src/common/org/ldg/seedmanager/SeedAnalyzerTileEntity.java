@@ -40,11 +40,11 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
     }
 
     public ItemStack getResultFor(ItemStack input, boolean reduce_stack) {
-        if (!isSeed(inventory[0])) {
+        if (!isSeed(input)) {
             return null;
         }
 
-        ItemStack old_seed = inventory[0];
+        ItemStack old_seed = input;
 
         short id = ItemCropSeed.getIdFromStack(old_seed);
         byte growth = ItemCropSeed.getGrowthFromStack(old_seed);
