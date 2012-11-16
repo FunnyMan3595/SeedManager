@@ -12,6 +12,7 @@ import net.minecraft.src.IInventory;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.Material;
 import net.minecraft.src.ModLoader;
+import net.minecraft.src.MovingObjectPosition;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NetworkManager;
 import net.minecraft.src.Packet;
@@ -220,5 +221,17 @@ public class SeedManagerBlock extends BlockContainer {
 
     protected int damageDropped(int data) {
         return 0;
+    }
+
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
+        int meta = world.getBlockMetadata(x, y, z);
+
+        if (meta <= DATA_LIBRARY_ON) {
+            return new ItemStack(this, 1, DATA_LIBRARY_ON);
+        } else if (meta >= DATA_ANALYZER) {
+            return new ItemStack(this, 1, DATA_ANALYZER_POWERED);
+        }
+
+        return null;
     }
 }
