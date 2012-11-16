@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import net.minecraft.src.Container;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ICrafting;

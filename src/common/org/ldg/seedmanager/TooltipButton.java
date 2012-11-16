@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import net.minecraft.src.GuiButton;
 
 public class TooltipButton extends GuiButton implements IHasTooltip {

@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import net.minecraft.src.ItemStack;
 import ic2.common.ItemCropSeed;
 

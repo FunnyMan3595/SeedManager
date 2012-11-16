@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import cpw.mods.fml.client.TextureFXManager;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import net.minecraft.client.Minecraft;

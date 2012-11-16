@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import cpw.mods.fml.common.Side;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.NBTTagCompound;

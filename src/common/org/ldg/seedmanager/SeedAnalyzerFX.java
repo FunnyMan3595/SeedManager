@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.RenderEngine;
 import net.minecraft.src.TextureFX;

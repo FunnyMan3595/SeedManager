@@ -2,7 +2,7 @@
 {
   "modid" : "IC2.SeedManager",
   "name" : "SeedManager",
-  "version" : "3.0",
+  "version" : "%conf:VERSION%",
   "url" : "http://forum.industrial-craft.net/index.php?page=Thread&threadID=5152",
   "authors": [
      "FunnyMan3595"

@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.ItemBlock;
 

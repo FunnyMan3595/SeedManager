@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import buildcraft.api.core.Orientations;
 import buildcraft.api.inventory.ISpecialInventory;
 import cpw.mods.fml.common.network.PacketDispatcher;

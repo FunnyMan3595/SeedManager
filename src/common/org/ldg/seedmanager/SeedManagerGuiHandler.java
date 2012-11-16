@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import cpw.mods.fml.common.network.IGuiHandler;
 import ic2.common.ContainerElectricMachine;
 import ic2.common.IHasGui;

@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import ic2.common.GuiIconButton;
 import net.minecraft.src.ItemStack;
 

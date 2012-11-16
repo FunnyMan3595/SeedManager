@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Side;
@@ -41,14 +43,14 @@ import net.minecraft.src.TileEntity;
 @Mod(
     modid="IC2.SeedManager",
     name="SeedManager",
-    version="3.0",
+    version="%conf:VERSION%",
     dependencies="required-after:IC2;after:*"
 )
 @NetworkMod(
     clientSideRequired=true,
     serverSideRequired=false,
     tinyPacketHandler=SeedManager.PacketHandler.class,
-    versionBounds="[3.0]"
+    versionBounds="%conf:VERSION_BOUNDS%"
 )
 public class SeedManager {
 

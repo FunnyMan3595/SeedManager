@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.Side;

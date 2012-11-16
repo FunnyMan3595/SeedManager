@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import ic2.common.ContainerElectricMachine;
 import ic2.common.TileEntityElectricMachine;
 import net.minecraft.client.Minecraft;

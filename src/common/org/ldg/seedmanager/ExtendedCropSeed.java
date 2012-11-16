@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import ic2.common.ItemCropSeed;
 import ic2.common.Ic2Items;
 import net.minecraft.src.CreativeTabs;

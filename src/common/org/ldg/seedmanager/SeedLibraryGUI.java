@@ -1,3 +1,5 @@
+package org.ldg.seedmanager;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.GuiButton;
 import net.minecraft.src.GuiContainer;
