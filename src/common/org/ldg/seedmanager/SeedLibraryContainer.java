@@ -44,14 +44,14 @@ public class SeedLibraryContainer extends Container
         return seedlibrary.isUseableByPlayer(entityplayer);
     }
 
-    public ItemStack slotClick(int i, int j, boolean flag, EntityPlayer entityplayer) {
+    public ItemStack slotClick(int i, int j, int k, EntityPlayer entityplayer) {
         if (i == 9) {
             // Clicked the "take a seed's type" slot.
             ItemStack seed = entityplayer.inventory.getItemStack();
             seedlibrary.getGUIFilter().setCropFromSeed(seed);
             return null;
         }
-        return super.slotClick(i, j, flag, entityplayer);
+        return super.slotClick(i, j, k, entityplayer);
     }
 
     public ItemStack transferStackInSlot(int i)
@@ -80,14 +80,6 @@ public class SeedLibraryContainer extends Container
             else
             {
                 slot.onSlotChanged();
-            }
-            if (itemstack1.stackSize != itemstack.stackSize)
-            {
-                slot.onPickupFromSlot(itemstack1);
-            }
-            else
-            {
-                return null;
             }
         }
         return itemstack;

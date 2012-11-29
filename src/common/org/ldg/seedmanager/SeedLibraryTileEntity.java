@@ -1,6 +1,5 @@
 package org.ldg.seedmanager;
 
-import buildcraft.api.core.Orientations;
 import buildcraft.api.inventory.ISpecialInventory;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.Side;
@@ -15,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
+import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.src.Block;
 import net.minecraft.src.EntityPlayer;
@@ -24,7 +24,6 @@ import net.minecraft.src.Material;
 import net.minecraft.src.NBTBase;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
-import net.minecraft.src.NetworkManager;
 import net.minecraft.src.Packet;
 import net.minecraft.src.TileEntity;
 
@@ -176,7 +175,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     public void checkMetadata(int correctData) {
         if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) != correctData) {
             worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, correctData);
-            worldObj.markBlockAsNeedsUpdate(xCoord, yCoord, zCoord);
+            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
         }
     }
 
@@ -492,7 +491,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
 
 
     // ISpecialInventory
-    public synchronized int addItem(ItemStack stack, boolean doAdd, Orientations from) {
+    public synchronized int addItem(ItemStack stack, boolean doAdd, ForgeDirection from) {
         // When out of power, input continues to work.
         // (It's assumed that this is a simple operation, and that it's the
         //  analysis and sorting for extraction that takes power.)
@@ -508,7 +507,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         return stack.stackSize;
     }
 
-    public synchronized ItemStack[] extractItem(boolean doRemove, Orientations from, int maxItemCount) {
+    public synchronized ItemStack[] extractItem(boolean doRemove, ForgeDirection from, int maxItemCount) {
         // When out of power, output is disabled.
         if (energy <= 0) {
             return new ItemStack[0];
@@ -519,7 +518,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         }
 
         List<ItemStack> stacks = new ArrayList<ItemStack>();
-        if (DEBUG_SEEDS && from == Orientations.YPos) {
+        if (DEBUG_SEEDS && from == ForgeDirection.UP) {
             Random rand = new Random();
             short id = (short) (rand.nextInt(15) + 1);
             byte growth = (byte) rand.nextInt(32);

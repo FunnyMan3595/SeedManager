@@ -16,7 +16,6 @@ import net.minecraft.src.Material;
 import net.minecraft.src.ModLoader;
 import net.minecraft.src.MovingObjectPosition;
 import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.NetworkManager;
 import net.minecraft.src.Packet;
 import net.minecraft.src.TileEntity;
 import net.minecraft.src.World;
@@ -221,7 +220,7 @@ public class SeedManagerBlock extends BlockContainer {
         super.breakBlock(world, x, y, z, id, data);
     }
 
-    protected int damageDropped(int data) {
+    public int damageDropped(int data) {
         return 0;
     }
 

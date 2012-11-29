@@ -3,6 +3,7 @@ package org.ldg.seedmanager;
 import ic2.common.ItemCropSeed;
 import ic2.common.Ic2Items;
 import net.minecraft.src.CreativeTabs;
+import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
 import java.util.List;
 
@@ -18,8 +19,8 @@ public class ExtendedCropSeed extends ItemCropSeed {
     }
 
     @SuppressWarnings("unchecked")
-    public void addInformation(ItemStack stack, List list) {
-        super.addInformation(stack, list);
+    public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean flag) {
+        super.addInformation(stack, player, list, flag);
         if (getScannedFromStack(stack) == 4) {
             int growth = getGrowthFromStack(stack);
             int gain = getGainFromStack(stack);

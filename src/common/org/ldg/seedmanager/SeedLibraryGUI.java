@@ -175,7 +175,7 @@ public class SeedLibraryGUI extends GuiContainer
         drawRect(left+1, top+1, right-1, bottom-1, 0xffc6c6c6);
     }
 
-    protected void drawGuiContainerForegroundLayer()
+    protected void drawGuiContainerForegroundLayer(int mouse_x, int mouse_y)
     {
         SeedLibraryTileEntity seedlibrary = getLibrary();
         if (seedlibrary == null) {
@@ -256,7 +256,7 @@ public class SeedLibraryGUI extends GuiContainer
             showTooltip(mouseX, mouseY, tooltip);
         }
 
-        super.drawGuiContainerForegroundLayer();
+        super.drawGuiContainerForegroundLayer(mouse_x, mouse_y);
     }
 
     public String getTooltip(int x, int y) {

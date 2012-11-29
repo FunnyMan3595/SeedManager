@@ -176,7 +176,7 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
     public void setMetadata(int correctData) {
 
         worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, correctData);
-        worldObj.markBlocksDirty(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
+        worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
     }
 
     public String getInvName() {

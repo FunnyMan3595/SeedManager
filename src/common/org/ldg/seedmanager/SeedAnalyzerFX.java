@@ -3,7 +3,7 @@ package org.ldg.seedmanager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.RenderEngine;
 import net.minecraft.src.TextureFX;
-import net.minecraft.src.TexturePackBase;
+import net.minecraft.src.ITexturePack;
 import java.util.Random;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL11;
 
 public class SeedAnalyzerFX extends TextureFX {
     public long tickCount;
-    public TexturePackBase loadedPack = null;
+    public ITexturePack loadedPack = null;
     public static Random random = new Random();
 
     // Are we currently in need of updating the image, even if it otherwise
@@ -43,7 +43,7 @@ public class SeedAnalyzerFX extends TextureFX {
     }
 
     public boolean checkTexturePack() {
-        TexturePackBase tp = null;
+        ITexturePack tp = null;
         try {
             tp = Minecraft.getMinecraft().renderEngine.texturePack.getSelectedTexturePack();
         } catch (Exception e) {}

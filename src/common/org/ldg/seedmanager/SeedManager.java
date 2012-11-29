@@ -35,7 +35,6 @@ import net.minecraft.src.NBTBase;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NetHandler;
 import net.minecraft.src.NetServerHandler;
-import net.minecraft.src.NetworkManager;
 import net.minecraft.src.Packet131MapData;
 import net.minecraft.src.Packet1Login;
 import net.minecraft.src.TileEntity;
@@ -44,7 +43,7 @@ import net.minecraft.src.TileEntity;
     modid="IC2.SeedManager",
     name="SeedManager",
     version="%conf:VERSION%",
-    dependencies="required-after:IC2;after:*"
+    dependencies="required-after:IC2"
 )
 @NetworkMod(
     clientSideRequired=true,
@@ -219,11 +218,11 @@ public class SeedManager {
             } else { // Server/bukkit side
                 EntityPlayerMP player = ((NetServerHandler)handler).getPlayer();
                 if (id < 2) { // SeedLibrary functions
-                    if (!(player.craftingInventory instanceof SeedLibraryContainer)) {
+                    if (!(player.openContainer instanceof SeedLibraryContainer)) {
                         return;
                     }
 
-                    SeedLibraryContainer container = (SeedLibraryContainer)player.craftingInventory;
+                    SeedLibraryContainer container = (SeedLibraryContainer)player.openContainer;
 
                     if (container.seedlibrary.energy <= 0) {
                         return;
