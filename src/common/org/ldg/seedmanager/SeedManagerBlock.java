@@ -4,15 +4,18 @@ import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.Side;
 import ic2.api.Items;
+import ic2.api.IWrenchable;
 import java.util.*;
 import net.minecraft.src.BlockContainer;
 import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.EntityItem;
+import net.minecraft.src.EntityLiving;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.IBlockAccess;
 import net.minecraft.src.IInventory;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.Material;
+import net.minecraft.src.MathHelper;
 import net.minecraft.src.ModLoader;
 import net.minecraft.src.MovingObjectPosition;
 import net.minecraft.src.NBTTagCompound;
@@ -68,10 +71,57 @@ public class SeedManagerBlock extends BlockContainer {
     }
 
     @Override
+    public void onBlockEventReceived(World world, int x, int y, int z, int eventID, int value) {
+        if((eventID != 0) || (SeedManager.getSide() == Side.SERVER)) {
+            return; // ???  The hell is this?
+        }
+
+        TileEntity te = world.getBlockTileEntity(x, y, z);
+        if (te instanceof IWrenchable) {
+            IWrenchable machine = (IWrenchable) te;
+
+            machine.setFacing((short) value);
+            world.markBlockForUpdate(x, y, z);
+        }
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void getSubBlocks(int id, CreativeTabs type, List tabContents) {
         tabContents.add(new ItemStack(id, 1, DATA_ANALYZER_BLOCKED));
         tabContents.add(new ItemStack(id, 1, DATA_LIBRARY_ON));
+    }
+
+    @Override
+    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLiving entity) {
+        if (SeedManager.getSide() == Side.CLIENT) {
+            return;
+        }
+
+        TileEntity te = world.getBlockTileEntity(x, y, z);
+
+        if (!(te instanceof IWrenchable)) {
+            return;
+        }
+
+        IWrenchable seedManager = (IWrenchable) te;
+
+        int facing = MathHelper.floor_double((double)(entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+
+        switch(facing) {
+            case 0:
+                seedManager.setFacing((short) 2);
+                break;
+            case 1:
+                seedManager.setFacing((short) 5);
+                break;
+            case 2:
+                seedManager.setFacing((short) 3);
+                break;
+            case 3:
+                seedManager.setFacing((short) 4);
+                break;
+        }
     }
 
     @Override
@@ -121,13 +171,13 @@ public class SeedManagerBlock extends BlockContainer {
     {
         TileEntity te = world.getBlockTileEntity(x,y,z);
 
-        if (te instanceof IHasFront) {
-            IHasFront fronted = (IHasFront) te;
+        if (te instanceof IWrenchable) {
+            IWrenchable fronted = (IWrenchable) te;
 
             // Just fix the side index to match the default front side, then
             // fall through to the metadata-based version.
             if (side > 1) { // Not top or bottom.
-                if (side == fronted.getFront()) {
+                if (side == fronted.getFacing()) {
                     side = DEFAULT_FRONT_SIDE;
                 } else {
                     side = DEFAULT_NON_FRONT_SIDE;

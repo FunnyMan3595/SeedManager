@@ -25,9 +25,10 @@ import net.minecraft.src.NBTBase;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
 import net.minecraft.src.Packet;
+import net.minecraft.src.Packet54PlayNoteBlock;
 import net.minecraft.src.TileEntity;
 
-public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWrenchable, ISpecialInventory, IHasFront {
+public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWrenchable, ISpecialInventory {
     public static final boolean DEBUG_SEEDS = false;
     protected SeedLibraryFilter[] filters = new SeedLibraryFilter[7];
     protected HashMap<String, ItemStack> deepContents = new HashMap<String, ItemStack>();
@@ -48,13 +49,11 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         // The GUI filter gets a reference to the library, so that it can
         // announce when its count changes.
         filters[filters.length - 1] = new SeedLibraryFilter(this);
-
-        front = (new Random()).nextInt(4) + 2;
     }
 
-    @Override
-    public int getFront() {
-        return front;
+    public Packet getDescriptionPacket() {
+        return new Packet54PlayNoteBlock(xCoord, yCoord, zCoord, SeedManager.instance.seedmanager.blockID,
+                                         0, front);
     }
 
     public void sendPacketToNearby(int id, byte[] data) {
@@ -401,6 +400,10 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
                 storeSeeds(stack);
             }
         }
+
+        if (input.hasKey("Facing")) {
+            front = input.getInteger("Facing");
+        }
     }
 
     @Override
@@ -436,28 +439,34 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         }
 
         output.setTag("Filters", filterlist);
+        output.setInteger("Facing", front);
     }
 
 
-    // IWrenchable
+    // public interface IWrenchable {
     @Override
-    public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int side) {
-        return false;
+    public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int facing) {
+        return front != facing && facing > 1;
     }
 
     @Override
     public short getFacing() {
-        return 0;
+        return (short) front;
     }
 
     @Override
-    public void setFacing(short facing) { }
+    public void setFacing(short facing) {
+        front = facing;
+
+        if (SeedManager.getSide() != Side.CLIENT) {
+            worldObj.addBlockEvent(xCoord, yCoord, zCoord, SeedManager.instance.seedmanager.blockID,
+                                   0, front);
+        }
+    }
 
     @Override
     public boolean wrenchCanRemove(EntityPlayer entityPlayer) {
         if (deepContents.isEmpty()) {
-            // Always drop the canonical item.
-            checkMetadata(SeedManagerBlock.DATA_LIBRARY_ON);
             return true;
         } else {
             return false;
@@ -468,6 +477,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     public float getWrenchDropRate() {
         return 1.0f;
     }
+    // }
 
 
     // IInventory

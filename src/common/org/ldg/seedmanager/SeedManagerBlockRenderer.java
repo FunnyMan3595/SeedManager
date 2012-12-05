@@ -7,6 +7,8 @@ import net.minecraft.src.IBlockAccess;
 import net.minecraft.src.RenderBlocks;
 import net.minecraft.src.TileEntity;
 
+import ic2.api.IWrenchable;
+
 public class SeedManagerBlockRenderer implements ISimpleBlockRenderingHandler {
     public int renderID;
 
@@ -34,8 +36,8 @@ public class SeedManagerBlockRenderer implements ISimpleBlockRenderingHandler {
         int oldValue = render.uvRotateTop;
 
         TileEntity te = world.getBlockTileEntity(x, y, z);
-        if(te instanceof IHasFront) {
-            int front = ((IHasFront)te).getFront();
+        if(te instanceof IWrenchable) {
+            int front = ((IWrenchable)te).getFacing();
             render.uvRotateTop = (front + 1) % 4;
         }
 

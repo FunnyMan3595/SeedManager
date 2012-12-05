@@ -1,18 +1,22 @@
 package org.ldg.seedmanager;
 
+import cpw.mods.fml.common.Side;
+
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
+import net.minecraft.src.Packet;
+import net.minecraft.src.Packet54PlayNoteBlock;
 import net.minecraft.src.TileEntity;
 import ic2.common.TileEntityElectricMachine;
 import ic2.common.ItemCropSeed;
+import ic2.api.IWrenchable;
 import ic2.api.Items;
 import ro.narc.liquiduu.IAcceleratorFriend;
 import ro.narc.liquiduu.InstantRecipe;
 
-public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements IHasFront, IAcceleratorFriend {
+public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements IAcceleratorFriend, IWrenchable {
     public static final int[] cost_to_upgrade = {10, 90, 900, 9000};
     public static final int cost_reduction = 2;
-    public int front = 3;
 
     // This keeps track of the analyzer's internal state.  When it changes, a
     // metadata change is forced (even if not needed) so that the graphics
@@ -23,9 +27,9 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         super(3, 5, 2000/cost_reduction, 32);
     }
 
-    @Override
-    public int getFront() {
-        return front;
+    public Packet getDescriptionPacket() {
+        return new Packet54PlayNoteBlock(xCoord, yCoord, zCoord, SeedManager.instance.seedmanager.blockID,
+                                         0, getFacing());
     }
 
     public static boolean isSeed(ItemStack stack) {
@@ -193,11 +197,29 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         return "SeedAnalyzerGUI";
     }
 
+    //public interface IWrenchable {
+    @Override
+    public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int facing) {
+        return facing != getFacing() && facing > 1;
+    }
+
+    @Override 
+    public short getFacing() {
+        return super.getFacing();
+    }
+
+    @Override
+    public void setFacing(short facing) {
+        super.setFacing(facing);
+
+        if (SeedManager.getSide() != Side.CLIENT) {
+            worldObj.addBlockEvent(xCoord, yCoord, zCoord, SeedManager.instance.seedmanager.blockID,
+                                   0, facing);
+        }
+    }
+
     @Override
     public boolean wrenchCanRemove(EntityPlayer entityPlayer) {
-        // Always drop the canonical item.
-        setMetadata(SeedManagerBlock.DATA_ANALYZER_BLOCKED);
-
         return true;
     }
 
@@ -205,6 +227,7 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
     public float getWrenchDropRate() {
         return 1.0f;
     }
+    // }
 
     //public interface IAcceleratorFriend {
     // Is this machine ready to use this input?

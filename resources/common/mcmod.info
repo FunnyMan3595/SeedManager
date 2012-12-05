@@ -5,7 +5,8 @@
   "version" : "%conf:VERSION%",
   "url" : "http://forum.industrial-craft.net/index.php?page=Thread&threadID=5152",
   "authors": [
-     "FunnyMan3595"
+     "FunnyMan3595",
+     "narc0tiq"
   ],
   "description": "Adds a static (block form) seed analyzer and storage facility for IC2 seed bags.",
   "logoFile" : "",

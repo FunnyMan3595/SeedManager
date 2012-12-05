@@ -56,6 +56,7 @@ public class SeedManager {
     public static final boolean DEBUG = true;
     public static Configuration config;
     public static SeedManager instance = null;
+    public SeedManagerBlock seedmanager = null;
 
     @SidedProxy(clientSide = "org.ldg.seedmanager.ClientProxy", serverSide = "org.ldg.seedmanager.CommonProxy")
     public static CommonProxy proxy;
@@ -100,7 +101,7 @@ public class SeedManager {
         }
 
         // Register with ModLoader.
-        SeedManagerBlock seedmanager = new SeedManagerBlock(ids[0]);
+        seedmanager = new SeedManagerBlock(ids[0]);
         GameRegistry.registerBlock(seedmanager, SeedManagerItem.class);
         GameRegistry.registerTileEntity(SeedAnalyzerTileEntity.class, "Seed Analyzer");
         GameRegistry.registerTileEntity(SeedLibraryTileEntity.class, "Seed Library");
