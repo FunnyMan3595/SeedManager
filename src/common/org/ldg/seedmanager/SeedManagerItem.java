@@ -12,7 +12,15 @@ public class SeedManagerItem extends ItemBlock {
     @Override
     public int getMetadata(int damage)
     {
-        return damage;
+        if (damage == SeedManagerBlock.DAMAGE_LIBRARY_LEGACY) {
+            return SeedManagerBlock.DATA_LIBRARY_OFF;
+        } else if (damage == SeedManagerBlock.DAMAGE_ANALYZER_LEGACY) {
+            return SeedManagerBlock.DATA_ANALYZER;
+        } else if (damage < SeedManagerBlock.DATA_ANALYZER) {
+            return SeedManagerBlock.DATA_LIBRARY_OFF;
+        } else {
+            return SeedManagerBlock.DATA_ANALYZER;
+        }
     }
 
     @Override

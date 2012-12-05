@@ -27,8 +27,12 @@ public class SeedManagerBlock extends BlockContainer {
     // An uninteresting side (i.e. not front, top, or bottom).
     public static final int DEFAULT_NON_FRONT_SIDE = 2;
 
-    public static final byte DATA_LIBRARY_OFF = 0;
-    public static final byte DATA_LIBRARY_ON = 1;
+    // For pre-3.0 saves.
+    public static final byte DAMAGE_ANALYZER_LEGACY = 0;
+    public static final byte DAMAGE_LIBRARY_LEGACY = 1;
+
+    public static final byte DATA_LIBRARY_OFF = 2;
+    public static final byte DATA_LIBRARY_ON = 3;
 
     // Base data value for a Seed Analyzer
     public static final byte DATA_ANALYZER = 8;
