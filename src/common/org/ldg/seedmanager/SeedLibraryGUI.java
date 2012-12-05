@@ -34,8 +34,9 @@ public class SeedLibraryGUI extends GuiContainer
     public final String YELLOW = "\u00A7E";
     public final String WHITE = "\u00A7F";
 
-    public int mouseX = -1;
-    public int mouseY = -1;
+    public int lastMouseX = -1;
+    public int lastMouseY = -1;
+    String tooltip = null;
 
     protected List realControls = null;
     protected List noControls = new ArrayList();
@@ -87,6 +88,7 @@ public class SeedLibraryGUI extends GuiContainer
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
@@ -148,6 +150,7 @@ public class SeedLibraryGUI extends GuiContainer
         realControls = controlList;
     }
 
+    @Override
     protected void actionPerformed(GuiButton guibutton)
     {
         SeedLibraryTileEntity seedlibrary = getLibrary();
@@ -175,6 +178,7 @@ public class SeedLibraryGUI extends GuiContainer
         drawRect(left+1, top+1, right-1, bottom-1, 0xffc6c6c6);
     }
 
+    @Override
     protected void drawGuiContainerForegroundLayer(int mouse_x, int mouse_y)
     {
         SeedLibraryTileEntity seedlibrary = getLibrary();
@@ -251,9 +255,12 @@ public class SeedLibraryGUI extends GuiContainer
 
         fontRenderer.drawString("Inventory", 8, (ySize - 96) + 2, 0x404040);
 
-        String tooltip = getTooltip(mouseX, mouseY);
+        if (lastMouseX != mouse_x || lastMouseY != mouse_y) {
+            onMouseMoved(mouse_x, mouse_y);
+        }
+
         if (tooltip != null && tooltip.length() > 0) {
-            showTooltip(mouseX, mouseY, tooltip);
+            showTooltip(mouse_x, mouse_y, tooltip);
         }
 
         super.drawGuiContainerForegroundLayer(mouse_x, mouse_y);
@@ -383,6 +390,7 @@ public class SeedLibraryGUI extends GuiContainer
         drawCreativeTabHoveringText(contents, x - guiLeft, y - guiTop);
     }
 
+    @Override
     protected void drawGuiContainerBackgroundLayer(float f, int i, int j)
     {
         SeedLibraryTileEntity seedlibrary = getLibrary();
@@ -469,6 +477,7 @@ public class SeedLibraryGUI extends GuiContainer
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
+    @Override
     protected void mouseClicked(int x, int y, int button) {
         super.mouseClicked(x, y, button);
         SeedLibraryTileEntity seedlibrary = getLibrary();
@@ -628,6 +637,7 @@ public class SeedLibraryGUI extends GuiContainer
     }
 
 
+    @Override
     protected void mouseMovedOrUp(int x, int y, int button) {
         super.mouseMovedOrUp(x, y, button);
 
@@ -635,9 +645,6 @@ public class SeedLibraryGUI extends GuiContainer
         if (seedlibrary == null) {
             return;
         }
-
-        mouseX = x;
-        mouseY = y;
 
         if (rightSelect != null && button == 1) {
             // Release a button pressed with RMB.
@@ -649,36 +656,41 @@ public class SeedLibraryGUI extends GuiContainer
             current_slider = -1;
             return;
         }
-        if (button == -1) {
-            // Mouse moved.
-            // If we're following the mouse with a slider, move it.
-            if (current_slider != -1) {
-                int value = drag_start_value + (x - drag_start_x) / 2;
-                if (value < 0) {
-                    value = 0;
-                } else if (value > 31) {
-                    value = 31;
-                }
 
-                int bar = (current_slider / 2);
-                int min = getSliderValue(bar * 2);
-                int max = getSliderValue(bar * 2 + 1);
-                boolean is_max = (current_slider % 2) == 1;
-                if (is_max && min > value) {
-                    value = min;
-                } else if (!is_max && max < value) {
-                    value = max;
-                }
-
-                if (getSliderValue(current_slider) != value) {
-                    setSliderValue(current_slider, value);
-                }
-            }
-        } else if (button == 0) {
+        if (button == 0) {
             // LMB up.
             // Stop tracking the mouse with a slider.
             if (current_slider != -1) {
                 current_slider = -1;
+            }
+        }
+    }
+
+    public void onMouseMoved(int new_x, int new_y) {
+        // Update the tooltip.
+        tooltip = getTooltip(new_x, new_y);
+
+        // If we're following the mouse with a slider, move it.
+        if (current_slider != -1) {
+            int value = drag_start_value + (new_x - drag_start_x) / 2;
+            if (value < 0) {
+                value = 0;
+            } else if (value > 31) {
+                value = 31;
+            }
+
+            int bar = (current_slider / 2);
+            int min = getSliderValue(bar * 2);
+            int max = getSliderValue(bar * 2 + 1);
+            boolean is_max = (current_slider % 2) == 1;
+            if (is_max && min > value) {
+                value = min;
+            } else if (!is_max && max < value) {
+                value = max;
+            }
+
+            if (getSliderValue(current_slider) != value) {
+                setSliderValue(current_slider, value);
             }
         }
     }

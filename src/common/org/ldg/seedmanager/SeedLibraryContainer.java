@@ -21,7 +21,7 @@ public class SeedLibraryContainer extends Container
             addSlotToContainer(new Slot(seedlibrary, i, 8 + i * 18, 108));
         }
 
-        addSlotToContainer(new Slot(seedlibrary, -1, 38, 16));
+        addSlotToContainer(new FakeSlot(seedlibrary, -1, 38, 16));
 
         int i = 2*18;
 
@@ -39,11 +39,13 @@ public class SeedLibraryContainer extends Container
         }
     }
 
+    @Override
     public boolean canInteractWith(EntityPlayer entityplayer)
     {
         return seedlibrary.isUseableByPlayer(entityplayer);
     }
 
+    @Override
     public ItemStack slotClick(int i, int j, int k, EntityPlayer entityplayer) {
         if (i == 9) {
             // Clicked the "take a seed's type" slot.
@@ -54,8 +56,13 @@ public class SeedLibraryContainer extends Container
         return super.slotClick(i, j, k, entityplayer);
     }
 
-    public ItemStack transferStackInSlot(int i)
+    @Override
+    public ItemStack transferStackInSlot(EntityPlayer player, int i)
     {
+        if (i == 10) {
+            return null;
+        }
+
         ItemStack itemstack = null;
         Slot slot = (Slot)inventorySlots.get(i);
         if (slot != null && slot.getHasStack())
@@ -85,6 +92,7 @@ public class SeedLibraryContainer extends Container
         return itemstack;
     }
 
+    @Override
     public void addCraftingToCrafters(ICrafting crafter) {
         super.addCraftingToCrafters(crafter);
 

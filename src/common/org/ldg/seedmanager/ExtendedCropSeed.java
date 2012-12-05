@@ -18,6 +18,7 @@ public class ExtendedCropSeed extends ItemCropSeed {
         this.setCreativeTab(CreativeTabs.tabMaterials);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean flag) {
         super.addInformation(stack, player, list, flag);

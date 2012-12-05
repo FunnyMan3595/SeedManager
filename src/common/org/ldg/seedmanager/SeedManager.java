@@ -53,11 +53,11 @@ import net.minecraft.src.TileEntity;
 )
 public class SeedManager {
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     public static Configuration config;
     public static SeedManager instance = null;
 
-    @SidedProxy(clientSide = "ClientProxy", serverSide = "CommonProxy")
+    @SidedProxy(clientSide = "org.ldg.seedmanager.ClientProxy", serverSide = "org.ldg.seedmanager.CommonProxy")
     public static CommonProxy proxy;
 
     public static int real_mod(int number, int modulus) {
@@ -145,6 +145,7 @@ public class SeedManager {
     }
 
     public static class PacketHandler implements ITinyPacketHandler {
+        @Override
         public void handle(NetHandler handler, Packet131MapData packet) {
             short id = packet.uniqueID;
             byte[] data = packet.itemData;
@@ -153,7 +154,7 @@ public class SeedManager {
                 System.out.println("Got packet " + id + ":");
                 String data_str = "";
                 for (byte datum : data) {
-                    data_str += datum + ",";
+                    data_str += String.format("%02x ", datum & 0xFF);
                 }
                 System.out.println(data_str);
             }

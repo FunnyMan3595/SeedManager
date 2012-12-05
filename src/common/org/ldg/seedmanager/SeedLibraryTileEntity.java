@@ -50,6 +50,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         filters[filters.length - 1] = new SeedLibraryFilter(this);
     }
 
+    @Override
     public int getFront() {
         return front;
     }
@@ -148,6 +149,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         sendPacketToNearby(1, data);
     }
 
+    @Override
     public void updateEntity() {
         super.updateEntity();
         checkMetadata();
@@ -370,6 +372,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     }
 
     // Save/load
+    @Override
     public void readFromNBT(NBTTagCompound input)
     {
         super.readFromNBT(input);
@@ -398,6 +401,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         }
     }
 
+    @Override
     public void writeToNBT(NBTTagCompound output)
     {
         super.writeToNBT(output);
@@ -434,16 +438,20 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
 
 
     // IWrenchable
+    @Override
     public boolean wrenchCanSetFacing(EntityPlayer entityPlayer, int side) {
         return false;
     }
 
+    @Override
     public short getFacing() {
         return 0;
     }
 
+    @Override
     public void setFacing(short facing) { }
 
+    @Override
     public boolean wrenchCanRemove(EntityPlayer entityPlayer) {
         if (deepContents.isEmpty()) {
             // Always drop the canonical item.
@@ -454,12 +462,14 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         }
     }
 
+    @Override
     public float getWrenchDropRate() {
         return 1.0f;
     }
 
 
     // IInventory
+    @Override
     public synchronized ItemStack getStackInSlot(int slot)
     {
         if (slot < 0 || slot >= 9) {
@@ -468,6 +478,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         return super.getStackInSlot(slot);
     }
 
+    @Override
     public synchronized ItemStack decrStackSize(int i, int j)
     {
         if (i < 0 || i >= 9) {
@@ -476,6 +487,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         return super.decrStackSize(i, j);
     }
 
+    @Override
     public synchronized void setInventorySlotContents(int i, ItemStack itemstack)
     {
         if (i < 0 || i >= 9) {
@@ -484,6 +496,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         super.setInventorySlotContents(i, itemstack);
     }
 
+    @Override
     public String getInvName()
     {
         return "Seed Library";
@@ -491,6 +504,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
 
 
     // ISpecialInventory
+    @Override
     public synchronized int addItem(ItemStack stack, boolean doAdd, ForgeDirection from) {
         // When out of power, input continues to work.
         // (It's assumed that this is a simple operation, and that it's the
@@ -507,6 +521,7 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         return stack.stackSize;
     }
 
+    @Override
     public synchronized ItemStack[] extractItem(boolean doRemove, ForgeDirection from, int maxItemCount) {
         // When out of power, output is disabled.
         if (energy <= 0) {

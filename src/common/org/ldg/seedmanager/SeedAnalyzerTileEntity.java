@@ -23,6 +23,7 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         super(3, 5, 2000/cost_reduction, 32);
     }
 
+    @Override
     public int getFront() {
         return front;
     }
@@ -39,6 +40,7 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         return true;
     }
 
+    @Override
     public ItemStack getResultFor(ItemStack input, boolean reduce_stack) {
         if (!isSeed(input)) {
             return null;
@@ -69,6 +71,7 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         return ItemCropSeed.generateItemStackFromValues(id, growth, gain, resistance, scan);
     }
 
+    @Override
     public boolean canOperate() {
         if (isRedstonePowered()) {
             boolean need_input = (inventory[0] == null);
@@ -143,6 +146,7 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         return true;
     }
 
+    @Override
     public void updateEntity() {
         super.updateEntity();
 
@@ -179,14 +183,17 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
     }
 
+    @Override
     public String getInvName() {
         return "Seed Analyzer";
     }
 
+    @Override
     public String getGuiClassName(EntityPlayer player) {
         return "SeedAnalyzerGUI";
     }
 
+    @Override
     public boolean wrenchCanRemove(EntityPlayer entityPlayer) {
         // Always drop the canonical item.
         setMetadata(SeedManagerBlock.DATA_ANALYZER_BLOCKED);
@@ -194,17 +201,20 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         return true;
     }
 
+    @Override
     public float getWrenchDropRate() {
         return 1.0f;
     }
 
     //public interface IAcceleratorFriend {
     // Is this machine ready to use this input?
+    @Override
     public boolean instantReady(ItemStack input) {
         return true;
     }
 
     // What's the recipe for this input?
+    @Override
     public InstantRecipe getInstantRecipe(ItemStack input) {
         if (!isSeed(input)) {
             return null;
@@ -237,12 +247,14 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
 
     // How many of these batches can the machine handle right now?
     // NOTE: Only called in advanced mode (recipe.machine == null)
+    @Override
     public int instantCapacity(InstantRecipe recipe, int batches) {
         return batches;
     }
 
     // We have made some batches of the recipe.
     // NOTE: Only called in advanced mode (recipe.machine == null)
+    @Override
     public void instantProcess(InstantRecipe recipe, int batches) { }
     //}
 }

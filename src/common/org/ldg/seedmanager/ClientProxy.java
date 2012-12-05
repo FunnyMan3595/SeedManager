@@ -8,6 +8,7 @@ import net.minecraft.src.ItemStack;
 import net.minecraftforge.client.MinecraftForgeClient;
 
 public class ClientProxy extends CommonProxy {
+    @Override
     public void init(SeedManagerBlock seedmanager, ItemStack seedAnalyzer,
                      ItemStack seedLibrary) {
         // Preload the in-world texture.
@@ -22,6 +23,7 @@ public class ClientProxy extends CommonProxy {
         LanguageRegistry.addName(seedLibrary, "Seed Library");
     }
 
+    @Override
     public EntityPlayer getLocalPlayer() {
         return Minecraft.getMinecraft().thePlayer;
     }

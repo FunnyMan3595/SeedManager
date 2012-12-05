@@ -58,6 +58,7 @@ public class SeedLibrarySort implements java.util.Comparator<ItemStack> {
         }
     }
 
+    @Override
     public int compare(ItemStack seed_1, ItemStack seed_2) {
         if (sort_type == NO_SORT) {
             return 0;

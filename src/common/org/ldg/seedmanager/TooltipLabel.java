@@ -8,6 +8,7 @@ public class TooltipLabel extends TooltipButton {
         super(id, x, y, w, h, label);
     }
 
+    @Override
     public void drawButton(Minecraft minecraft, int mouse_x, int mouse_y) {
         this.drawCenteredString(minecraft.fontRenderer, this.displayString, this.xPosition + this.width / 2, this.yPosition, 0x404040);
     }
@@ -18,6 +19,7 @@ public class TooltipLabel extends TooltipButton {
                                 color);
     }
 
+    @Override
     public boolean mousePressed(Minecraft minecraft, int mouse_x, int mouse_y) {
         return false;
     }

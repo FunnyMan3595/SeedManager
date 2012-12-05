@@ -9,11 +9,13 @@ public class SeedManagerItem extends ItemBlock {
         setHasSubtypes(true);
     }
 
+    @Override
     public int getMetadata(int damage)
     {
         return damage;
     }
 
+    @Override
     public String getItemNameIS(ItemStack itemstack)
     {
         int i = itemstack.getItemDamage();

@@ -16,12 +16,14 @@ public class SeedAnalyzerGUI extends GuiContainer
         container = containerelectricmachine;
     }
 
-    protected void drawGuiContainerForegroundLayer()
+    @Override
+    protected void drawGuiContainerForegroundLayer(int mouse_x, int mouse_y)
     {
         fontRenderer.drawString("Seed Analyzer", 58, 6, 0x404040);
         fontRenderer.drawString("Inventory", 8, (ySize - 96) + 2, 0x404040);
     }
 
+    @Override
     protected void drawGuiContainerBackgroundLayer(float f, int i, int j)
     {
         int k = mc.renderEngine.getTexture("/ic2/sprites/GUICompressor.png");

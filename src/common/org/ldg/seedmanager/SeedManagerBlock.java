@@ -62,12 +62,14 @@ public class SeedManagerBlock extends BlockContainer {
         setRequiresSelfNotify();
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public void getSubBlocks(int id, CreativeTabs type, List tabContents) {
         tabContents.add(new ItemStack(id, 1, DATA_ANALYZER_BLOCKED));
         tabContents.add(new ItemStack(id, 1, DATA_LIBRARY_ON));
     }
 
+    @Override
     public boolean onBlockActivated(World world, int i, int j, int k, EntityPlayer player, int side, float hit_x, float hit_y, float hit_z)
     {
         if (player.isSneaking())
@@ -84,10 +86,12 @@ public class SeedManagerBlock extends BlockContainer {
         return true;
     }
 
+    @Override
     public TileEntity createNewTileEntity(World world) {
         return null;
     }
 
+    @Override
     public TileEntity createNewTileEntity(World world, int data) {
         if (data >= DATA_ANALYZER) {
             return new SeedAnalyzerTileEntity();
@@ -107,6 +111,7 @@ public class SeedManagerBlock extends BlockContainer {
      * XNeg=4
      * XPos=5
      */
+    @Override
     public int getBlockTexture(IBlockAccess world, int x, int y, int z, int side)
     {
         TileEntity te = world.getBlockTileEntity(x,y,z);
@@ -128,6 +133,7 @@ public class SeedManagerBlock extends BlockContainer {
         return getBlockTextureFromSideAndMetadata(side, world.getBlockMetadata(x, y, z));
     }
 
+    @Override
     public int getBlockTextureFromSideAndMetadata(int side, int data) {
         int x = 0;
         int y = 0;
@@ -173,14 +179,17 @@ public class SeedManagerBlock extends BlockContainer {
         return y*16 + x;
     }
 
+    @Override
     public String getTextureFile() {
         return "/fm_seedmanager.png";
     }
 
+    @Override
     public int idDropped(int i, Random random, int j) {
         return Items.getItem("machine").itemID;
     }
 
+    @Override
     public void breakBlock(World world, int x, int y, int z, int id, int data)
     {
         IInventory inventory = (IInventory)world.getBlockTileEntity(x, y, z);
@@ -220,10 +229,12 @@ public class SeedManagerBlock extends BlockContainer {
         super.breakBlock(world, x, y, z, id, data);
     }
 
+    @Override
     public int damageDropped(int data) {
         return 0;
     }
 
+    @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
         int meta = world.getBlockMetadata(x, y, z);
 

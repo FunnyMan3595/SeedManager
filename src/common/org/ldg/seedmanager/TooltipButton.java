@@ -9,6 +9,7 @@ public class TooltipButton extends GuiButton implements IHasTooltip {
         super(id, x, y, w, h, label);
     }
 
+    @Override
     public String getActiveTooltip(int mouse_x, int mouse_y) {
         if (mouse_x < xPosition || mouse_x >= xPosition + width) {
             // Left/right of button.

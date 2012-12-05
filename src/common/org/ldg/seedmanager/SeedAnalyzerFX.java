@@ -87,6 +87,7 @@ public class SeedAnalyzerFX extends TextureFX {
         return loadedPack != null;
     }
 
+    @Override
     public void onTick() {
         if (!checkTexturePack()) {
             return;
@@ -116,6 +117,7 @@ public class SeedAnalyzerFX extends TextureFX {
     }
 
     // This lets us write to the correct texture.
+    @Override
     public void bindImage(RenderEngine engine)
     {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, engine.getTexture("/fm_seedmanager.png"));
