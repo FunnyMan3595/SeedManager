@@ -11,10 +11,8 @@ import ic2.common.TileEntityElectricMachine;
 import ic2.common.ItemCropSeed;
 import ic2.api.IWrenchable;
 import ic2.api.Items;
-import ro.narc.liquiduu.IAcceleratorFriend;
-import ro.narc.liquiduu.InstantRecipe;
 
-public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements IAcceleratorFriend, IWrenchable {
+public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements IWrenchable {
     public static final int[] cost_to_upgrade = {10, 90, 900, 9000};
     public static final int cost_reduction = 2;
 
@@ -228,56 +226,4 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
         return 1.0f;
     }
     // }
-
-    //public interface IAcceleratorFriend {
-    // Is this machine ready to use this input?
-    @Override
-    public boolean instantReady(ItemStack input) {
-        return true;
-    }
-
-    // What's the recipe for this input?
-    @Override
-    public InstantRecipe getInstantRecipe(ItemStack input) {
-        if (!isSeed(input)) {
-            return null;
-        }
-
-        byte scan = ItemCropSeed.getScannedFromStack(input);
-        if (scan >= 4) {
-            return new InstantRecipe(input, input, 0);
-        }
-
-        short id = ItemCropSeed.getIdFromStack(input);
-        byte growth = ItemCropSeed.getGrowthFromStack(input);
-        byte gain = ItemCropSeed.getGainFromStack(input);
-        byte resistance = ItemCropSeed.getResistanceFromStack(input);
-        ItemStack output = ItemCropSeed.generateItemStackFromValues(id, growth, gain, resistance, (byte)4);
-
-        int cost = 450;
-        if (scan < 3) {
-            cost += 45;
-        }
-        if (scan < 2) {
-            cost += 4;
-        }
-        if (scan < 1) {
-            cost += 1;
-        }
-
-        return new InstantRecipe(input, output, cost);
-    }
-
-    // How many of these batches can the machine handle right now?
-    // NOTE: Only called in advanced mode (recipe.machine == null)
-    @Override
-    public int instantCapacity(InstantRecipe recipe, int batches) {
-        return batches;
-    }
-
-    // We have made some batches of the recipe.
-    // NOTE: Only called in advanced mode (recipe.machine == null)
-    @Override
-    public void instantProcess(InstantRecipe recipe, int batches) { }
-    //}
 }

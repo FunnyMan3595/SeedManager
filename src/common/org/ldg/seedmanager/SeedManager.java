@@ -53,10 +53,13 @@ import net.minecraft.src.TileEntity;
 )
 public class SeedManager {
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static Configuration config;
     public static SeedManager instance = null;
     public SeedManagerBlock seedmanager = null;
+
+    public Class<? extends SeedAnalyzerTileEntity> analyzerClass = null;
+    public Class<? extends SeedLibraryTileEntity> libraryClass = null;
 
     @SidedProxy(clientSide = "org.ldg.seedmanager.ClientProxy", serverSide = "org.ldg.seedmanager.CommonProxy")
     public static CommonProxy proxy;
@@ -103,8 +106,11 @@ public class SeedManager {
         // Register with ModLoader.
         seedmanager = new SeedManagerBlock(ids[0]);
         GameRegistry.registerBlock(seedmanager, SeedManagerItem.class);
-        GameRegistry.registerTileEntity(SeedAnalyzerTileEntity.class, "Seed Analyzer");
-        GameRegistry.registerTileEntity(SeedLibraryTileEntity.class, "Seed Library");
+
+        // Initialize analyzerClass and libraryClass.
+        initClasses();
+        GameRegistry.registerTileEntity(analyzerClass, "Seed Analyzer");
+        GameRegistry.registerTileEntity( libraryClass, "Seed Library");
 
         // Overwrite the IC2 crop seed with the improved version.
         Ic2Items.cropSeed = new ItemStack(new ExtendedCropSeed(Ic2Items.cropSeed));
@@ -135,6 +141,26 @@ public class SeedManager {
 
         // Register the GUI handler.
         NetworkRegistry.instance().registerGuiHandler(this, new SeedManagerGuiHandler());
+    }
+
+    @SuppressWarnings("unchecked")
+    public void initClasses() {
+        try {
+            // Bind to LiquidUU if available.
+            Class analyzerWithUU = Class.forName("org.ldg.seedmanager.SeedAnalyzerTileEntityUU");
+            analyzerClass = (Class<? extends SeedAnalyzerTileEntity>) analyzerWithUU;
+        } catch (Exception e) {
+            // Otherwise, use the standard version.
+            analyzerClass = SeedAnalyzerTileEntity.class;
+        }
+        try {
+            // Bind to Buildcraft if available.
+            Class libraryWithBC = Class.forName("org.ldg.seedmanager.SeedLibraryTileEntityBC");
+            libraryClass = (Class<? extends SeedLibraryTileEntity>) libraryWithBC;
+        } catch (Exception e) {
+            // Otherwise, use the standard version.
+            libraryClass = SeedLibraryTileEntity.class;
+        }
     }
 
     public static Side getSide() {

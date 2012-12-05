@@ -148,13 +148,16 @@ public class SeedManagerBlock extends BlockContainer {
 
     @Override
     public TileEntity createNewTileEntity(World world, int data) {
-        if (data >= DATA_ANALYZER) {
-            return new SeedAnalyzerTileEntity();
-        } else if (data == DATA_LIBRARY_OFF || data == DATA_LIBRARY_ON) {
-            return new SeedLibraryTileEntity();
-        } else {
-            return null;
-        }
+        try {
+            if (data >= DATA_ANALYZER) {
+                return SeedManager.instance.analyzerClass.newInstance();
+            } else if (data == DATA_LIBRARY_OFF || data == DATA_LIBRARY_ON) {
+                return SeedManager.instance.libraryClass.newInstance();
+            }
+        } catch (Exception e) { }  // This really should never fail.
+                                   // But Java's being bureaucratic.  As usual.
+
+        return null;
     }
 
     /**
