@@ -48,6 +48,8 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
         // The GUI filter gets a reference to the library, so that it can
         // announce when its count changes.
         filters[filters.length - 1] = new SeedLibraryFilter(this);
+
+        front = (new Random()).nextInt(4) + 2;
     }
 
     @Override

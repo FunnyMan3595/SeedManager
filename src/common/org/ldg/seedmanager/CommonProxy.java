@@ -10,4 +10,8 @@ public class CommonProxy {
     public EntityPlayer getLocalPlayer() {
         return null;
     }
+
+    public int getRenderId() {
+        return 0;
+    }
 }

@@ -50,6 +50,7 @@ public class SeedManagerBlock extends BlockContainer {
         DATA_ANALYZER + BIT_HAS_POWER + BIT_HAS_SEED + BIT_WORKING;
 
 
+    public boolean renderingInInventory = false;
     public Random random = new Random();
 
     public SeedManagerBlock(int id) {
@@ -245,5 +246,18 @@ public class SeedManagerBlock extends BlockContainer {
         }
 
         return null;
+    }
+
+    public void setInventoryRender(boolean renderingInInventory) {
+        this.renderingInInventory = renderingInInventory;
+    }
+
+    @Override
+    public int getRenderType() {
+        if(renderingInInventory) {
+            return 0;
+        }
+
+        return SeedManager.proxy.getRenderId();
     }
 }
