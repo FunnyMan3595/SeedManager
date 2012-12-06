@@ -40,12 +40,18 @@ public class SeedAnalyzerTileEntityUU extends SeedAnalyzerTileEntity implements 
         byte resistance = ItemCropSeed.getResistanceFromStack(input);
         ItemStack output = ItemCropSeed.generateItemStackFromValues(id, growth, gain, resistance, (byte)4);
 
+        int display_id = id;
+        if (ItemCropSeed.getScannedFromStack(input) <= 0) {
+            display_id = -1;
+        }
+        ItemStack fake_output = ItemCropSeed.generateItemStackFromValues(id, growth, gain, resistance, (byte)-42);
+
         int cost = 0;
         for (int level=scan; level<4; level++) {
             cost += cost_to_upgrade[level];
         }
 
-        return new InstantRecipe(input, output, cost / 20);
+        return new InstantRecipe(input, output, fake_output, cost / 20);
     }
 
     // How many of these batches can the machine handle right now?
