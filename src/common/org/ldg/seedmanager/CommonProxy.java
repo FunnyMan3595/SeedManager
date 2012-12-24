@@ -1,7 +1,7 @@
 package org.ldg.seedmanager;
 
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.ItemStack;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 
 public class CommonProxy {
     public void init(SeedManagerBlock seedmanager, ItemStack seedAnalyzer,

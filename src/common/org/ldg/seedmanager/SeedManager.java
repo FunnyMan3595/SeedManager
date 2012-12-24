@@ -2,7 +2,6 @@ package org.ldg.seedmanager;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Side;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -12,32 +11,36 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+
 import ic2.api.Ic2Recipes;
 import ic2.api.Items;
-import ic2.common.ContainerElectricMachine;
-import ic2.common.Ic2Items;
-import ic2.common.IHasGui;
+import ic2.core.block.machine.ContainerElectricMachine;
+import ic2.core.Ic2Items;
+import ic2.core.IHasGui;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
+
+import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetServerHandler;
+import net.minecraft.network.packet.NetHandler;
+import net.minecraft.network.packet.Packet131MapData;
+import net.minecraft.network.packet.Packet1Login;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
+
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraft.src.Block;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.EntityPlayerMP;
-import net.minecraft.src.Item;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.MathHelper;
-import net.minecraft.src.ModLoader;
-import net.minecraft.src.NBTBase;
-import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.NetHandler;
-import net.minecraft.src.NetServerHandler;
-import net.minecraft.src.Packet131MapData;
-import net.minecraft.src.Packet1Login;
-import net.minecraft.src.TileEntity;
 
 @Mod(
     modid="IC2.SeedManager",
@@ -103,9 +106,9 @@ public class SeedManager {
         } catch (NumberFormatException e) {
         }
 
-        // Register with ModLoader.
+        // Register with the block registry.
         seedmanager = new SeedManagerBlock(ids[0]);
-        GameRegistry.registerBlock(seedmanager, SeedManagerItem.class);
+        GameRegistry.registerBlock(seedmanager, SeedManagerItem.class, seedmanager.getBlockName());
 
         // Initialize analyzerClass and libraryClass.
         initClasses();

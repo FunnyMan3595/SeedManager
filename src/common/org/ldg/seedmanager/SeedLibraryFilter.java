@@ -1,11 +1,14 @@
 package org.ldg.seedmanager;
 
-import cpw.mods.fml.common.Side;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.NBTTagCompound;
+import cpw.mods.fml.relauncher.Side;
+
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+
 import ic2.api.CropCard;
 import ic2.api.Items;
-import ic2.common.ItemCropSeed;
+import ic2.core.item.ItemCropSeed;
+
 import java.util.Collection;
 import java.util.Vector;
 

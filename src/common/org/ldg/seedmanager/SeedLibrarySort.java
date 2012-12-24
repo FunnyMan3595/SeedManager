@@ -1,7 +1,8 @@
 package org.ldg.seedmanager;
 
-import net.minecraft.src.ItemStack;
-import ic2.common.ItemCropSeed;
+import net.minecraft.item.ItemStack;
+
+import ic2.core.item.ItemCropSeed;
 
 public class SeedLibrarySort implements java.util.Comparator<ItemStack> {
     public static final int NO_SORT = -1;

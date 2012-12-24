@@ -1,9 +1,11 @@
 package org.ldg.seedmanager;
 
-import ic2.common.ContainerElectricMachine;
-import ic2.common.TileEntityElectricMachine;
+import ic2.core.block.machine.ContainerElectricMachine;
+import ic2.core.block.machine.tileentity.TileEntityElectricMachine;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.src.*;
+import net.minecraft.client.gui.inventory.GuiContainer;
+
 import org.lwjgl.opengl.GL11;
 
 public class SeedAnalyzerGUI extends GuiContainer

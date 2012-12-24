@@ -1,11 +1,13 @@
 package org.ldg.seedmanager;
 
 import ic2.api.CropCard;
-import ic2.common.ItemCropSeed;
-import ic2.common.Ic2Items;
-import net.minecraft.src.CreativeTabs;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.ItemStack;
+import ic2.core.item.ItemCropSeed;
+import ic2.core.Ic2Items;
+
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+
 import java.util.List;
 
 public class ExtendedCropSeed extends ItemCropSeed {

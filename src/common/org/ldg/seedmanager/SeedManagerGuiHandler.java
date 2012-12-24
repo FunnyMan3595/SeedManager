@@ -1,11 +1,14 @@
 package org.ldg.seedmanager;
 
 import cpw.mods.fml.common.network.IGuiHandler;
-import ic2.common.ContainerElectricMachine;
-import ic2.common.IHasGui;
-import net.minecraft.src.TileEntity;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.World;
+
+import ic2.core.block.machine.ContainerElectricMachine;
+import ic2.core.IHasGui;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+
 public class SeedManagerGuiHandler implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world,

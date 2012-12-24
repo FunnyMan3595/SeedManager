@@ -1,8 +1,8 @@
 package org.ldg.seedmanager;
 
-import net.minecraft.src.IInventory;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
 
 public class FakeSlot extends Slot {
     public FakeSlot(IInventory inventory, int index, int x, int y) {

@@ -1,11 +1,15 @@
 package org.ldg.seedmanager;
 
 import buildcraft.api.inventory.ISpecialInventory;
+
 import ic2.api.Items;
-import ic2.common.ItemCropSeed;
+import ic2.core.item.ItemCropSeed;
+
 import java.util.*;
+
+import net.minecraft.item.ItemStack;
+
 import net.minecraftforge.common.ForgeDirection;
-import net.minecraft.src.ItemStack;
 
 public class SeedLibraryTileEntityBC extends SeedLibraryTileEntity implements ISpecialInventory {
     // public interface ISpecialInventory {

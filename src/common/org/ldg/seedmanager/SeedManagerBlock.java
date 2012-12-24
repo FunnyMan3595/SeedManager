@@ -2,26 +2,28 @@ package org.ldg.seedmanager;
 
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
-import cpw.mods.fml.common.Side;
+import cpw.mods.fml.relauncher.Side;
+
 import ic2.api.Items;
 import ic2.api.IWrenchable;
+
 import java.util.*;
-import net.minecraft.src.BlockContainer;
-import net.minecraft.src.CreativeTabs;
-import net.minecraft.src.EntityItem;
-import net.minecraft.src.EntityLiving;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.IBlockAccess;
-import net.minecraft.src.IInventory;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.Material;
-import net.minecraft.src.MathHelper;
-import net.minecraft.src.ModLoader;
-import net.minecraft.src.MovingObjectPosition;
-import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.Packet;
-import net.minecraft.src.TileEntity;
-import net.minecraft.src.World;
+
+import net.minecraft.block.BlockContainer;
+import net.minecraft.block.material.Material;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 public class SeedManagerBlock extends BlockContainer {
     // Which side should get the front texture if we don't know?
@@ -271,15 +273,14 @@ public class SeedManagerBlock extends BlockContainer {
                         i1 = itemstack.stackSize;
                     }
                     itemstack.stackSize -= i1;
-                    EntityItem entityitem = new EntityItem(world, (float)x + f, (float)y + f1, (float)z + f2, new ItemStack(itemstack.itemID, i1, itemstack.getItemDamage()));
-                    float f3 = 0.05F;
-                    entityitem.motionX = (float)random.nextGaussian() * f3;
-                    entityitem.motionY = (float)random.nextGaussian() * f3 + 0.2F;
-                    entityitem.motionZ = (float)random.nextGaussian() * f3;
+
+                    ItemStack toDrop = new ItemStack(itemstack.itemID, i1, itemstack.getItemDamage());
                     if (itemstack.hasTagCompound())
                     {
-                        entityitem.item.setTagCompound((NBTTagCompound)itemstack.getTagCompound().copy());
+                        toDrop.setTagCompound((NBTTagCompound)itemstack.getTagCompound().copy());
                     }
+
+                    EntityItem entityitem = new EntityItem(world, (float)x + f, (float)y + f1, (float)z + f2, toDrop);
                     world.spawnEntityInWorld(entityitem);
                 }
             }

@@ -2,10 +2,10 @@ package org.ldg.seedmanager;
 
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 
-import net.minecraft.src.Block;
-import net.minecraft.src.IBlockAccess;
-import net.minecraft.src.RenderBlocks;
-import net.minecraft.src.TileEntity;
+import net.minecraft.block.Block;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.IBlockAccess;
 
 import ic2.api.IWrenchable;
 

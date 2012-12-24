@@ -1,16 +1,18 @@
 package org.ldg.seedmanager;
 
-import cpw.mods.fml.common.Side;
+import cpw.mods.fml.relauncher.Side;
 
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.Packet;
-import net.minecraft.src.Packet54PlayNoteBlock;
-import net.minecraft.src.TileEntity;
-import ic2.common.TileEntityElectricMachine;
-import ic2.common.ItemCropSeed;
-import ic2.api.IWrenchable;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.Packet54PlayNoteBlock;
+import net.minecraft.tileentity.TileEntity;
+
 import ic2.api.Items;
+import ic2.api.IWrenchable;
+import ic2.core.block.machine.tileentity.TileEntityElectricMachine;
+import ic2.core.item.ItemCropSeed;
+
 import ro.narc.liquiduu.IAcceleratorFriend;
 import ro.narc.liquiduu.InstantRecipe;
 

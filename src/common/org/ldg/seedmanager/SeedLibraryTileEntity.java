@@ -1,32 +1,37 @@
 package org.ldg.seedmanager;
 
 import buildcraft.api.inventory.ISpecialInventory;
+
 import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.Side;
+import cpw.mods.fml.relauncher.Side;
+
 import ic2.api.CropCard;
 import ic2.api.Items;
 import ic2.api.IWrenchable;
-import ic2.common.IC2;
-import ic2.common.ItemCropSeed;
-import ic2.common.TileEntityElecMachine;
+import ic2.core.IC2;
+import ic2.core.item.ItemCropSeed;
+import ic2.core.block.machine.tileentity.TileEntityElecMachine;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.Packet54PlayNoteBlock;
+import net.minecraft.tileentity.TileEntity;
+
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraft.src.Block;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.IInventory;
-import net.minecraft.src.ItemStack;
-import net.minecraft.src.Material;
-import net.minecraft.src.NBTBase;
-import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.NBTTagList;
-import net.minecraft.src.Packet;
-import net.minecraft.src.Packet54PlayNoteBlock;
-import net.minecraft.src.TileEntity;
 
 public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWrenchable, ISpecialInventory {
     public static final boolean DEBUG_SEEDS = false;

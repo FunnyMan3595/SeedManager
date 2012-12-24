@@ -1,19 +1,20 @@
 package org.ldg.seedmanager;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.src.GuiButton;
-import net.minecraft.src.GuiContainer;
-import net.minecraft.src.GuiScreen;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.InventoryPlayer;
-import net.minecraft.src.MathHelper;
-import net.minecraft.src.TileEntity;
-import net.minecraft.src.ModLoader;
-import net.minecraft.src.World;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
+
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.lwjgl.input.Mouse;
 
 public class SeedLibraryGUI extends GuiContainer
 {

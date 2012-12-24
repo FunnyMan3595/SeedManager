@@ -1,7 +1,7 @@
 package org.ldg.seedmanager;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.src.FontRenderer;
+import net.minecraft.client.gui.FontRenderer;
 
 public class TooltipLabel extends TooltipButton {
     public TooltipLabel(int id, int x, int y, int w, int h, String label) {

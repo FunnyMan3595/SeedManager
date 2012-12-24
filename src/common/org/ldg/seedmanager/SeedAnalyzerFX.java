@@ -1,13 +1,15 @@
 package org.ldg.seedmanager;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.src.RenderEngine;
-import net.minecraft.src.TextureFX;
-import net.minecraft.src.ITexturePack;
-import java.util.Random;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
+import net.minecraft.client.renderer.RenderEngine;
+import net.minecraft.client.renderer.texturefx.TextureFX;
+import net.minecraft.client.texturepacks.ITexturePack;
+
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.util.Random;
+import javax.imageio.ImageIO;
+
 import org.lwjgl.opengl.GL11;
 
 public class SeedAnalyzerFX extends TextureFX {
