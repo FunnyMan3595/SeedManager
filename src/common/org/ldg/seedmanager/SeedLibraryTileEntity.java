@@ -482,6 +482,11 @@ public class SeedLibraryTileEntity extends TileEntityElecMachine implements IWre
     public float getWrenchDropRate() {
         return 1.0f;
     }
+
+    @Override
+    public ItemStack getWrenchDrop(EntityPlayer player) {
+        return SeedManager.proxy.seedLibrary.copy();
+    }
     // }
 
 

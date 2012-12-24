@@ -226,5 +226,10 @@ public class SeedAnalyzerTileEntity extends TileEntityElectricMachine implements
     public float getWrenchDropRate() {
         return 1.0f;
     }
+
+    @Override
+    public ItemStack getWrenchDrop(EntityPlayer player) {
+        return SeedManager.proxy.seedAnalyzer.copy();
+    }
     // }
 }

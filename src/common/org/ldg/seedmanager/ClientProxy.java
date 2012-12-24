@@ -16,6 +16,8 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void init(SeedManagerBlock seedmanager, ItemStack seedAnalyzer,
                      ItemStack seedLibrary) {
+        super.init(seedmanager, seedAnalyzer, seedLibrary);
+
         // Preload the in-world texture.
         MinecraftForgeClient.preloadTexture("/fm_seedmanager.png");
 
